@@ -31,7 +31,6 @@ class Player(models.Model):
     
     user = models.ForeignKey(User)
     game = models.ForeignKey(Game)
-    order = models.PositiveIntegerField() # Position between the other players. Less is "left" and more is "right"
 
     city = models.ForeignKey(City)
     variant = models.ForeignKey(Variant)
@@ -55,10 +54,10 @@ class Player(models.Model):
 
     class Meta:
         unique_together = (
-            ('order', 'game'), # No two players can have the same order at the same game
             ('city', 'game'), # No two players can have the same city at the same game
             ('user', 'game'), # A usar can't play as two players (this can be changed, but there's a UI limitation right now)
         )
+        order_with_respect_to = 'game'
 
 class BattleResult(models.Model):
     """

@@ -1,6 +1,6 @@
 from django.contrib.admin.sites import AdminSite
 
-from evolve.rules.models import BuildingKind, Resource, Science, Variant, Age
+from evolve.rules.models import BuildingKind, Resource, Science, Variant, Age, City, Building, BuildOption
 
 site=AdminSite('rules')
 
@@ -9,4 +9,9 @@ site.register(Resource)
 site.register(Science)
 site.register(Variant)
 site.register(Age)
+
+site.register(City)
+site.register(Building)
+site.register(BuildOption)
+
 

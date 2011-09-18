@@ -42,7 +42,7 @@ class Resource(models.Model):
     is_basic = models.BooleanField()
 
     def __unicode__(self):
-        return self.name
+        return self.get_name_display()
 
     class Meta:
         ordering = ('is_basic', 'name',)

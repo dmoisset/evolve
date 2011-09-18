@@ -8,6 +8,7 @@ from django.db import models
 from django.core import validators
 from django.core.exceptions import ValidationError
 
+from evolve.rules import constants
 
 # Basic listings. This probably will always be fixed and won't be changed
 # even while balancing. Adding items to any of these models would probably
@@ -78,6 +79,7 @@ class Age(models.Model):
     """
     name = models.CharField(max_length=30, unique=True)
     order = models.PositiveIntegerField(unique=True) # Phases are played from lower to higher
+    direction = models.CharField(max_length=1, choices=constants.DIRECTIONS)
     victory_score = models.IntegerField() # Score given at this phase per military victory
     defeat_score = models.IntegerField(default=-1) # Score given at this phase per military defeat
 

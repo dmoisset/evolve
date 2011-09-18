@@ -30,7 +30,7 @@ class BuildingKind(models.Model):
     name = models.CharField(max_length=5, choices=KINDS, primary_key=True)
 
     def __unicode__(self):
-        return self.name
+        return self.get_name_display()
 
     class Meta:
         ordering = ('name',)
@@ -42,7 +42,7 @@ class Resource(models.Model):
     is_basic = models.BooleanField()
 
     def __unicode__(self):
-        return self.get_name_display()
+        return self.name
 
     class Meta:
         ordering = ('is_basic', 'name',)
@@ -144,6 +144,7 @@ class City(models.Model):
 
     class Meta:
         ordering = ('name',)
+        verbose_name_plural = 'cities'
 
 
 class Effect(models.Model):

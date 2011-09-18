@@ -5,6 +5,9 @@ during play
 """
 
 from django.db import models
+from django.core import validators
+from django.core.exceptions import ValidationError
+
 
 # Basic listings. This probably will always be fixed and won't be changed
 # even while balancing. Adding items to any of these models would probably
@@ -23,7 +26,7 @@ KINDS = (
 class BuildingKind(models.Model):
     """Possible building kinds"""
 
-    name = models.CharField(max_length=5, choices=KINDS, blank=True, null=True)
+    name = models.CharField(max_length=5, choices=KINDS, primary_key=True)
 
     def __unicode__(self):
         return self.name
@@ -31,6 +34,7 @@ class BuildingKind(models.Model):
     class Meta:
         ordering = ('name',)
     
+
 class Resource(models.Model):
     """Each of the possible resources to collect"""
     name = models.CharField(max_length=30, unique=True)
@@ -42,6 +46,7 @@ class Resource(models.Model):
     class Meta:
         ordering = ('is_basic', 'name',)
 
+
 class Science(models.Model):
     """Each of the available sciences"""
     name = models.CharField(max_length=30, unique=True)
@@ -51,6 +56,7 @@ class Science(models.Model):
 
     class Meta:
         ordering = ('name',)
+
 
 class Variant(models.Model):
     """
@@ -65,12 +71,13 @@ class Variant(models.Model):
     class Meta:
         ordering = ('label',)
 
+
 class Age(models.Model):
     """
     Each of the phases in a game
     """
-    name = models.CharField(max_length=30)
-    order = models.PositiveIntegerField() # Phases are played from lower to higher
+    name = models.CharField(max_length=30, unique=True)
+    order = models.PositiveIntegerField(unique=True) # Phases are played from lower to higher
     victory_score = models.IntegerField() # Score given at this phase per military victory
     defeat_score = models.IntegerField(default=-1) # Score given at this phase per military defeat
 
@@ -78,7 +85,7 @@ class Age(models.Model):
         return self.name
 
     class Meta:
-        ordering = ('name',)
+        ordering = ('order',)
 
 # Other listings that can be tuned to balance or add slight variantions to
 # the gameplay
@@ -91,11 +98,15 @@ class Cost(models.Model):
     money = models.PositiveIntegerField(default=0)
     # cost_line_set =  set of resource costs [reverse]
 
+    def items(self):
+        """Artially prettyprinted version of cost lines. An iterator on strings"""
+        return [unicode(l) for l in self.cost_line_set.all()]
+
     def __unicode__(self):
-        return "$%d, %s" % (
-            self.money,
-            ", ".join(self.cost_line_set.all())
-        )
+        elements = ["$%d" % self.money] if self.money else []
+        elements.extend(self.items())
+    
+        return ", ".join(elements)
 
     class Meta:
         ordering = ('money',)
@@ -104,11 +115,14 @@ class Cost(models.Model):
 class CostLine(models.Model):
     """An item inside a cost description"""
     cost = models.ForeignKey(Cost)
-    amount = models.PositiveIntegerField()
+    amount = models.PositiveIntegerField(validators=[validators.MinValueValidator(1)])
     resource = models.ForeignKey(Resource)
 
     def __unicode__(self):
-        return "%d×%s" % (self.amount, self.resource)
+        if self.amount == 1:
+            return unicode(self.resource)
+        else:
+            return "%d×%s" % (self.amount, self.resource)
 
     class Meta:
         unique_together = (
@@ -116,14 +130,19 @@ class CostLine(models.Model):
         )
         ordering = ('resource', 'amount')
 
+
 class City(models.Model):
     """A city where a player builds"""
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=30, unique=True)
     resource = models.ForeignKey(Resource)
     # city_special_set = set of specials
 
+    def __unicode__(self):
+        return self.name
+
     class Meta:
         ordering = ('name',)
+
 
 class Effect(models.Model):
     """
@@ -177,6 +196,48 @@ class Effect(models.Model):
     use_discards = models.BooleanField()
     copy_personality = models.BooleanField()
     
+    def clean(self):
+        # trade should be set iff a direction is
+        has_trade_1 = self.trade is not None
+        has_trade_2 = self.left_trade or self.right_trade
+        if has_trade_1 != has_trade_2:
+            raise ValidationError('Set trade attribute along left_trade and/or right_trade')
+        # pay per building type should be set if money is
+        has_pay_1 = self.kind_payed is not None
+        has_pay_2 = self.money_per_local_building > 0 or self.money_per_neighbor_building > 0
+        if has_pay_1 != has_pay_2:
+            raise ValidationError('Set kind_payed attribute along money_per_*')
+        # score per building type should be set if score_per is
+        has_score_1 = self.kind_scored is not None
+        has_score_2 = self.score_per_local_building > 0 or self.score_per_neighbor_building > 0
+        if has_score_1 != has_score_2:
+            raise ValidationError('Set kind_scored attribute along score_per_*')
+    
+    def __unicode__(self):
+        items = []
+        if self.production is not None:
+            if self.production.money > 0:
+                items.append("$%d" % self.production.money)
+            resources = self.production.items()
+            if resources:
+                items.append("/".join(resources))
+        if self.score:
+            items.append("%d pts" % self.score)
+        if self.military:
+            items.append("%d army" % self.military)
+        if self.sciences.all():
+            items.append("/".join(self.sciences.all()))
+        if self.left_trade or self.right_trade:
+            assert self.trade is not None # Validation rule
+            trade = "< "if self.left_trade else ""
+            trade += "(%d) " % self.trade.money
+            trade += "/".join(self.trade.items())
+            trade += " >" if self.right_trade else ""
+        # TODO: Score/money per specials
+        # TODO: score per defeats
+        # TODO: specials
+
+        return ", ".join(items)
 
 class CitySpecial(models.Model):
     """
@@ -187,6 +248,9 @@ class CitySpecial(models.Model):
     order = models.PositiveIntegerField() # Order in which the special needs to be built (specials are always built from lower to higher). 0-based
     cost = models.ForeignKey(Cost)
     effect = models.ForeignKey(Effect)
+
+    def __unicode__(self):
+        return "%s(%s) / %d" % (self.city, self.variant, self.order+1)
     
     class Meta:
         unique_together = (
@@ -198,20 +262,29 @@ class Building(models.Model):
     """
     What a player can put in cities to have its effects applied
     """
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=30, unique=True)
     kind = models.ForeignKey(BuildingKind)
     effect = models.ForeignKey(Effect)
 
     cost = models.ForeignKey(Cost)
     free_having = models.ForeignKey('self') # This models is free when having other bulding
 
+    def __unicode__(self):        
+        return self.name
+
     class Meta:
         ordering = ('name',)
 
 class BuildOption(models.Model):
     """An item allowing to create a specific bulding on a phase"""
-    players_needed = models.PositiveIntegerField()
+    players_needed = models.PositiveIntegerField(default=3)
     building = models.ForeignKey(Building)
     age = models.ForeignKey(Age)
     
+    def __unicode__(self):        
+        return "%s (+%d)" % (self.building, self.players_needed)
+
+    class Meta:
+        ordering = ('building',)
+
     

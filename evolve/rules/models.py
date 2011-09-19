@@ -230,13 +230,14 @@ class Effect(models.Model):
         if self.military:
             items.append("%d army" % self.military)
         if self.sciences.all():
-            items.append("/".join(self.sciences.all()))
+            items.append("/".join(unicode(s) for s in self.sciences.all()))
         if self.left_trade or self.right_trade:
             assert self.trade is not None # Validation rule
             trade = "< "if self.left_trade else ""
             trade += "(%d) " % self.trade.money
             trade += "/".join(self.trade.items())
             trade += " >" if self.right_trade else ""
+            items.append(trade)
         # TODO: Score/money per specials
         # TODO: score per defeats
         # TODO: specials

@@ -98,17 +98,17 @@ class Cost(models.Model):
     Also used to represent other sets of resources+money
     """
     money = models.PositiveIntegerField(default=0)
-    # cost_line_set =  set of resource costs [reverse]
+    # costline_set =  set of resource costs [reverse]
 
     def items(self):
         """Artially prettyprinted version of cost lines. An iterator on strings"""
-        return [unicode(l) for l in self.cost_line_set.all()]
+        return [unicode(l) for l in self.costline_set.all()]
 
     def __unicode__(self):
         elements = ["$%d" % self.money] if self.money else []
         elements.extend(self.items())
     
-        return ", ".join(elements)
+        return ", ".join(elements) if elements else "Free"
 
     class Meta:
         ordering = ('money',)
@@ -124,7 +124,7 @@ class CostLine(models.Model):
         if self.amount == 1:
             return unicode(self.resource)
         else:
-            return "%d×%s" % (self.amount, self.resource)
+            return u"%d×%s" % (self.amount, self.resource)
 
     class Meta:
         unique_together = (
@@ -211,10 +211,11 @@ class Effect(models.Model):
         if has_pay_1 != has_pay_2:
             raise ValidationError('Set kind_payed attribute along money_per_*')
         # score per building type should be set if score_per is
-        has_score_1 = self.kind_scored is not None
-        has_score_2 = self.score_per_local_building > 0 or self.score_per_neighbor_building > 0
-        if has_score_1 != has_score_2:
-            raise ValidationError('Set kind_scored attribute along score_per_*')
+        if self.pk is not None: # Avoid checking before first save
+            has_score_1 = bool(self.kinds_scored.all())
+            has_score_2 = self.score_per_local_building > 0 or self.score_per_neighbor_building > 0
+            if has_score_1 != has_score_2:
+                raise ValidationError('Set kind_scored attribute along score_per_*')
     
     def __unicode__(self):
         items = []
@@ -270,7 +271,7 @@ class Building(models.Model):
     effect = models.ForeignKey(Effect)
 
     cost = models.ForeignKey(Cost)
-    free_having = models.ForeignKey('self') # This models is free when having other bulding
+    free_having = models.ForeignKey('self', blank=True, null=True) # This models is free when having other bulding
 
     def __unicode__(self):        
         return self.name

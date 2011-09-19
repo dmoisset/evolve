@@ -20,9 +20,9 @@ class CitySpecialInline(admin.TabularInline):
 class CityAdmin(admin.ModelAdmin):
     inlines = [CitySpecialInline]
 
-site.register(City, CityAdmin)
-site.register(Building)
-site.register(BuildOption)
+admin.site.register(City, CityAdmin)
+admin.site.register(Building)
+admin.site.register(BuildOption)
 
 class CostLineInline(admin.TabularInline):
     model = CostLine
@@ -30,8 +30,8 @@ class CostLineInline(admin.TabularInline):
 class CostAdmin(admin.ModelAdmin):
     inlines = [CostLineInline]
 
-site.register(Cost, CostAdmin)
-site.register(Effect)
+admin.site.register(Cost, CostAdmin)
+admin.site.register(Effect)
 
 
 

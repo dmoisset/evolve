@@ -121,6 +121,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'evolve.rules',
     'evolve.game',
+    'evolve.base',
 )
 
 # A sample logging configuration. The only tangible logging

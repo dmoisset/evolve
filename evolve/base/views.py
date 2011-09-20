@@ -1,6 +1,8 @@
-from django.http import HttpResponse
 from django.shortcuts import redirect
-from django.contrib.auth.views import login as auth_login
+
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import authenticate, login
+from django.views.generic.edit import CreateView
 
 def home(request):
     if request.user.is_authenticated():
@@ -8,8 +10,20 @@ def home(request):
     else:
         return redirect('login')
     
-def register(request):
-    # /register/ : register and redirect to /game/
-    return HttpResponse()
-    
-    
+class RegisterView(CreateView):
+    form_class = UserCreationForm
+    template_name = 'registration/register.html'
+
+    def form_valid(self, form):
+        super(RegisterView, self).form_valid(form)
+        user = authenticate(
+            username=form.cleaned_data['username'],
+            password=form.cleaned_data['password1'])
+        assert user is not None # it was just created!
+        assert user.is_active
+        
+        login(self.request, user)
+        return redirect('games')
+
+register = RegisterView.as_view()
+

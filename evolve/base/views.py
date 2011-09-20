@@ -8,11 +8,6 @@ def home(request):
     else:
         return redirect('login')
     
-def login(request):
-    return auth_login(request)
-#    # /login/ : login, redirect to /game/ ; link to /register/
-#    return HttpResponse()
-    
 def register(request):
     # /register/ : register and redirect to /game/
     return HttpResponse()

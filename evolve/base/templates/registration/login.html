@@ -1,0 +1,11 @@
+<h1>Login</h1>
+
+<p>If you have no user, you can <a href="{% url register %}">register</a>
+
+<form action="" method="post">
+    <table>
+    {{form}}
+    <table>
+    {% csrf_token %}
+    <input type="submit">
+</form>

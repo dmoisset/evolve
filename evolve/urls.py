@@ -8,7 +8,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', 'evolve.base.views.home', name='home'),
-    url(r'^login/$', 'evolve.base.views.login', name='login'),
+    url(r'^login/$', 'django.contrib.auth.views.login', name='login'),
     url(r'^register/$', 'evolve.base.views.register', name='register'),
     url(r'^game/', include('evolve.game.urls')),
 

@@ -1,9 +1,12 @@
 from django.http import HttpResponse
+from django.shortcuts import redirect
 
 def home(request):
-    # / : if not logged in, redirect to /login/
-    #     if logged in redirect to /game/
-    return HttpResponse()
+    if request.user.is_authenticated():
+        return redirect('games')
+    else:
+        return redirect('login')
+        
     
 def login(request):
     # /login/ : login, redirect to /game/ ; link to /register/

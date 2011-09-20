@@ -1,0 +1,23 @@
+<h1>Games</h1>
+
+{% if user.is_authenticated %}
+    <a href="{% url new-game %}">Create new</a>
+{% endif %}
+
+{% if my_games %}
+<h2>My games</h2>
+
+<p>Games that you have created and/or are playing</p>
+{% endif %}
+
+{% if open_games %}
+<h2>Open games</h2>
+
+<p>Games that you can join</p>
+{% endif %}
+
+{% if started_games %}
+<h2>Games in progress</h2>
+
+<p>Games in progress</p>
+{% endif %}

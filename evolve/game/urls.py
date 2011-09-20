@@ -2,9 +2,9 @@ from django.conf.urls.defaults import patterns, include, url
 
 urlpatterns = patterns('evolve.game.views',
     url(r'^$', 'game_list', name='games'),
+    url(r'^new/$', 'new_game', name='new-game'),
 )
 
-# / : list of games; link to /new/
 # /new/ : creates new game, link to game page
 # /1/ : Main game screen, redirects according to state: If game...
 #       - is not started and not joined, join/

@@ -42,7 +42,7 @@
     {% for g in open_games %}
         {% if g.is_joinable %}
         <tr>
-            <td>{% for p in g.player_set.all %}{{ p.user }}{% empty %}No players{% endfor %}</td>
+            <td>{{ g.player_set.all|join:", "|default:"No players" }}</td>
             <td>{{ g.allowed_variants.all|join:", " }}</td>
             <td>{% if user.is_authenticated %}Join{% else %}<a href="{% url login %}">Login</a> to join{% endif %}</td>
         </tr>

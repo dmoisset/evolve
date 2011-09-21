@@ -8,8 +8,8 @@ from evolve.rules import constants
 
 class Game(models.Model):
     """A single match of the game, including all global game status"""
-    age = models.ForeignKey(Age)
-    turn = models.PositiveIntegerField()
+    age = models.ForeignKey(Age, default=Age.first)
+    turn = models.PositiveIntegerField(default=1)
 
     discards = models.ManyToManyField(BuildOption, blank=True, null=True)
     
@@ -18,6 +18,10 @@ class Game(models.Model):
     finished = models.BooleanField(default=False)
 
     special_use_discards_turn = models.BooleanField(default=False) # set when a player is picking from the discard pile
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('game-detail', [], {'game_id': self.id})
 
 class Player(models.Model):
     """Single player information for given game"""

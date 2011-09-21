@@ -83,6 +83,11 @@ class Age(models.Model):
     victory_score = models.IntegerField() # Score given at this phase per military victory
     defeat_score = models.IntegerField(default=-1) # Score given at this phase per military defeat
 
+    @classmethod
+    def first(cls):
+        """First Age"""
+        return cls.objects.order_by('order')[0]
+
     def __unicode__(self):
         return self.name
 

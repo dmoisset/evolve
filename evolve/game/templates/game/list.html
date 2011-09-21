@@ -44,7 +44,7 @@
         <tr>
             <td>{{ g.player_set.all|join:", "|default:"No players" }}</td>
             <td>{{ g.allowed_variants.all|join:", " }}</td>
-            <td>{% if user.is_authenticated %}Join{% else %}<a href="{% url login %}">Login</a> to join{% endif %}</td>
+            <td>{% if user.is_authenticated %}<a href="{{ g.get_absolute_url }}">Join</a>{% else %}<a href="{% url login %}">Login</a> to join{% endif %}</td>
         </tr>
         {% endif %}
     {% endfor %}

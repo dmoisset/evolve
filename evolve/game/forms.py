@@ -9,3 +9,5 @@ class NewGameForm(forms.ModelForm):
         model = Game
         fields = ('allowed_variants',)
 
+class JoinForm(forms.Form):
+    pass

@@ -51,7 +51,7 @@ class Game(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('game-detail', [], {'game_id': self.id})
+        return ('game-detail', [], {'pk': self.id})
 
 class Player(models.Model):
     """Single player information for given game"""

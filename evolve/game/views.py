@@ -1,9 +1,11 @@
 from django.template.response import TemplateResponse
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, FormView
+from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
 
-from evolve.game.models import Game
-from evolve.game.forms import NewGameForm
+from evolve.game.models import Game, Player
+from evolve.game.forms import NewGameForm, JoinForm
 
 def game_list(request):
     games = Game.objects.filter(finished=False) # Only non finished games   
@@ -34,5 +36,26 @@ class NewGameView(CreateView):
 
 new_game = login_required(NewGameView.as_view())
 
-def game_detail(request, game_id):
-    pass
+@login_required
+def game_detail(request, pk):
+    game = get_object_or_404(Game, id=pk)
+    try:
+        player = Player.objects.get(game=game, user=request.user)
+        return # FIXME: view own game
+    except Player.DoesNotExist:
+        if game.is_joinable():
+            return redirect('game-join', pk=pk)
+        else:
+            return # FIXME view game being waited to start
+
+class GameJoinView(SingleObjectMixin, FormView):
+    model = Game
+    form_class = JoinForm
+    template_name = 'game/join.html'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super(GameJoinView, self).get(request, *args, **kwargs)
+    
+game_join = login_required(GameJoinView.as_view())
+

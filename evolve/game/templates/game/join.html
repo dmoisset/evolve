@@ -1,0 +1,15 @@
+<h1>Join Game</h1>
+
+<p>Players: {{ game.player_set.all|join:", " }}</p>
+<p>City variants: {{ game.allowed_variants.all }}</p>
+
+<form action="" method="POST">
+    <table>
+        {{ form }}
+    </table>
+    {% csrf_token %}
+    <input type="submit">
+</form>
+
+<a href="{% url games %}">Cancel</a>
+

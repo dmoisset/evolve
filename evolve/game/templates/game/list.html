@@ -10,6 +10,22 @@
 <h2>My games</h2>
 
 <p>Games that you have created and/or are playing</p>
+
+    <table border="1">
+        <tr>
+            <th>Players</th>
+            <th>Status</th>
+            <th>Join</th>
+        </tr>
+    {% for g in my_games %}
+        <tr>
+            <td>{% for p in g.player_set.all %}{{ p.user }}{% empty %}No players{% endfor %}</td>
+            <td>{% if not g.started %}Waiting for players{% else %}{{ g.allowed_variants.all|join:", " }}{% endif %}</td>
+            <td>{% if not g.started %}Start{% else %}Play{% endif %}</td>
+        </tr>
+    {% endfor %}
+    <table>
+
 {% endif %}
 
 {% if open_games %}

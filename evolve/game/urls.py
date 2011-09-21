@@ -3,6 +3,7 @@ from django.conf.urls.defaults import patterns, include, url
 urlpatterns = patterns('evolve.game.views',
     url(r'^$', 'game_list', name='games'),
     url(r'^new/$', 'new_game', name='new-game'),
+    url(r'^(?P<game_id>\d+)/$', 'game_detail', name='game-detail'),
 )
 
 # /new/ : creates new game, link to game page

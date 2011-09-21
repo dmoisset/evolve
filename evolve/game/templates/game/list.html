@@ -17,9 +17,18 @@
 
     <p>Games that you can join</p>
 
-    <table>
+    <table border="1">
+        <tr>
+            <th>Players</th>
+            <th>Variants</th>
+            <th>Join</th>
+        </tr>
     {% for g in open_games %}
-        <tr><td>{% for p in g.player_set.all %}{{ p }}{% empty %}No players{% endfor %}</td><td>Join</td></tr>
+        <tr>
+            <td>{% for p in g.player_set.all %}{{ p }}{% empty %}No players{% endfor %}</td>
+            <td>{{ g.allowed_variants.all|join:", " }}</td>
+            <td>Join</td>
+        </tr>
     {% endfor %}
     <table>
 {% endif %}

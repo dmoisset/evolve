@@ -24,8 +24,14 @@ class Game(models.Model):
 
     special_use_discards_turn = models.BooleanField(default=False) # set when a player is picking from the discard pile
 
+    def is_joinable(self):
+        """True if the game has still room for more players"""
+        available_cities = City.objects.exclude(player__game=self)
+        return not self.started and bool(available_cities)
+
     def join(self, user):
         """Make the given user join to this game"""
+        assert self.is_joinable()
         # Pick a city
         available_cities = list(City.objects.exclude(player__game=self))
         variants = list(self.allowed_variants.all())

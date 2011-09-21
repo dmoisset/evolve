@@ -94,7 +94,7 @@ class Age(models.Model):
     class Meta:
         ordering = ('order',)
 
-# Other listings that can be tuned to balance or add slight variantions to
+# Other listings that can be tuned to balance or add slight variations to
 # the gameplay
 
 class Cost(models.Model):

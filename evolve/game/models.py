@@ -1,3 +1,5 @@
+import random
+
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -21,6 +23,25 @@ class Game(models.Model):
     finished = models.BooleanField(default=False)
 
     special_use_discards_turn = models.BooleanField(default=False) # set when a player is picking from the discard pile
+
+    def join(self, user):
+        """Make the given user join to this game"""
+        # Pick a city
+        available_cities = list(City.objects.exclude(player__game=self))
+        variants = list(self.allowed_variants.all())
+        assert variants # should be at least one, by modeling
+        if not available_cities:
+            raise City.DoesNotExist
+        # Create player
+        player = Player(
+            user=user,
+            game=self,
+            variant=random.choice(variants),
+            city=random.choice(available_cities),
+        )
+        player.save()
+        # TODO: if all cities assigned, game should auto-start?
+        
 
     @models.permalink
     def get_absolute_url(self):
@@ -50,14 +71,14 @@ class Player(models.Model):
     # battle_result_set = results of battles
     buildings = models.ManyToManyField(Building, blank=True, null=True)
     # Ages whre the special_free_bulding ability has been used already
-    special_free_building_ages_used = models.ManyToManyField(Age)
+    special_free_building_ages_used = models.ManyToManyField(Age, blank=True, null=True)
 
     # Private information, player decisions
     current_options = models.ManyToManyField(BuildOption, blank=True, null=True)
     card_picked = models.ForeignKey(BuildOption, blank=True, null=True, related_name='picker_set')
     action = models.CharField(max_length=5, choices=ACTIONS, blank=True)
-    trade_left = models.PositiveIntegerField() # Money used in trade with left player
-    trade_right = models.PositiveIntegerField() # Money used in trade with right player
+    trade_left = models.PositiveIntegerField(default=0) # Money used in trade with left player
+    trade_right = models.PositiveIntegerField(default=0) # Money used in trade with right player
 
     class Meta:
         unique_together = (

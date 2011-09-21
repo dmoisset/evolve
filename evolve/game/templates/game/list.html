@@ -19,7 +19,7 @@
         </tr>
     {% for g in my_games %}
         <tr>
-            <td>{% for p in g.player_set.all %}{{ p.user }}{% empty %}No players{% endfor %}</td>
+            <td>{{ g.player_set.all|join:", "|default:"No players" }}</td>
             <td>{% if not g.started %}Waiting for players{% else %}{{ g.allowed_variants.all|join:", " }}{% endif %}</td>
             <td>{% if not g.started %}Start{% else %}Play{% endif %}</td>
         </tr>

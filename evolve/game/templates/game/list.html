@@ -2,6 +2,8 @@
 
 {% if user.is_authenticated %}
     <a href="{% url new-game %}">Create new</a>
+{% else %}
+    <a href="{% url login %}">Login</a>
 {% endif %}
 
 {% if my_games %}
@@ -11,13 +13,23 @@
 {% endif %}
 
 {% if open_games %}
-<h2>Open games</h2>
+    <h2>Open games</h2>
 
-<p>Games that you can join</p>
+    <p>Games that you can join</p>
+
+    <table>
+    {% for g in open_games %}
+        <tr><td>{% for p in g.player_set.all %}{{ p }}{% empty %}No players{% endfor %}</td><td>Join</td></tr>
+    {% endfor %}
+    <table>
 {% endif %}
 
 {% if started_games %}
 <h2>Games in progress</h2>
 
 <p>Games in progress</p>
+{% endif %}
+
+{% if not my_games and not open_games and not started_games %}
+<p>No games</p>
 {% endif %}

@@ -8,12 +8,15 @@ from evolve.rules import constants
 
 class Game(models.Model):
     """A single match of the game, including all global game status"""
+    # game settings
+    allowed_variants = models.ManyToManyField(Variant)
+
+    # game state
     age = models.ForeignKey(Age, default=Age.first)
     turn = models.PositiveIntegerField(default=1)
-
     discards = models.ManyToManyField(BuildOption, blank=True, null=True)
     
-    # status
+    # status for the join/play/finish cycle
     started = models.BooleanField(default=False)
     finished = models.BooleanField(default=False)
 

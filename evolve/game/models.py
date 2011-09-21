@@ -93,6 +93,9 @@ class Player(models.Model):
         )
         order_with_respect_to = 'game'
 
+    def __unicode__(self):
+        return unicode(self.user)
+
 class BattleResult(models.Model):
     """
     Result of a battle where a player fought.

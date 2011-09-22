@@ -49,6 +49,10 @@ class Game(models.Model):
         player.save()
         # TODO: if all cities assigned, game should auto-start?
         
+    def is_startable(self):
+        """True if game can be started"""
+        return not self.started and self.player_set.count() >= constants.MINIMUM_PLAYERS
+
     def get_player(self, user):
         """Return player for user, or None if user not part of this game"""
         try:

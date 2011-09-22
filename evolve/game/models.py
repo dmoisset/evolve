@@ -24,10 +24,11 @@ class Game(models.Model):
 
     special_use_discards_turn = models.BooleanField(default=False) # set when a player is picking from the discard pile
 
-    def is_joinable(self):
-        """True if the game has still room for more players"""
+    def is_joinable(self, user=None):
+        """True if the game has still room for more players and user, is specified, isn't already playing"""
         available_cities = City.objects.exclude(player__game=self)
-        return not self.started and bool(available_cities)
+        user_not_playing = user is None or not bool(self.player_set.filter(user=user))
+        return not self.started and bool(available_cities) and bool(user_not_playing)
 
     def join(self, user):
         """Make the given user join to this game"""
@@ -89,7 +90,7 @@ class Player(models.Model):
     class Meta:
         unique_together = (
             ('city', 'game'), # No two players can have the same city at the same game
-            ('user', 'game'), # A usar can't play as two players (this can be changed, but there's a UI limitation right now)
+            ('user', 'game'), # A user can't play as two players (this can be changed, but there's a UI limitation right now)
         )
         order_with_respect_to = 'game'
 

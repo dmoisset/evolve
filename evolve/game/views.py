@@ -39,10 +39,10 @@ new_game = login_required(NewGameView.as_view())
 @login_required
 def game_detail(request, pk):
     game = get_object_or_404(Game, id=pk)
-    try:
-        player = Player.objects.get(game=game, user=request.user)
+    player = game.get_player(request.user)
+    if player:
         return # FIXME: view own game
-    except Player.DoesNotExist:
+    else:
         if game.is_joinable():
             return redirect('game-join', pk=pk)
         else:
@@ -64,6 +64,11 @@ class GameJoinView(SingleObjectMixin, FormView):
             return redirect(game.get_absolute_url())
         else:
             return self.form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        result = super(GameJoinView, self).get_context_data(**kwargs)
+        result['user_in_game'] = self.object.get_player(self.request.user)
+        return result
     
 game_join = login_required(GameJoinView.as_view())
 

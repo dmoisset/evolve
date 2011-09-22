@@ -3,13 +3,21 @@
 <p>Players: {{ game.player_set.all|join:", " }}</p>
 <p>City variants: {{ game.allowed_variants.all|join:", " }}</p>
 
-<form action="" method="POST">
-    <table>
-        {{ form }}
-    </table>
-    {% csrf_token %}
-    <input type="submit">
-</form>
+{% if game.is_joinable %}
+    {% if not user_in_game %}
+        <form action="" method="POST">
+            <table>
+                {{ form }}
+            </table>
+            {% csrf_token %}
+            <input type="submit">
+        </form>
 
+    {% else %}
+        <p class="error">You have already joined to this game</p>
+    {% endif %}
+{% else %}
+    <p class="error">Game can't be joined</p>
+{% endif %}
 <a href="{% url games %}">Cancel</a>
 

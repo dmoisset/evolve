@@ -14,6 +14,7 @@ from evolve.rules import constants
 # even while balancing. Adding items to any of these models would probably
 # imply a large impact on gameplay
 
+PERSONALITY = 'per' # Kind for personalities which are assigned in a special way
 KINDS = (
     ('mil','Military'),
     ('civ','Civilian'),
@@ -21,7 +22,7 @@ KINDS = (
     ('cpx','Complex Resource'),
     ('eco','Economic'),
     ('sci','Scientific'),
-    ('per','Personality'),
+    (PERSONALITY,'Personality'),
 )
 
 class BuildingKind(models.Model):

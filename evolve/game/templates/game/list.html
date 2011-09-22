@@ -21,7 +21,10 @@
         <tr>
             <td>{{ g.player_set.all|join:", "|default:"No players" }}</td>
             <td>{% if not g.started %}Waiting for players{% else %}{{ g.allowed_variants.all|join:", " }}{% endif %}</td>
-            <td>{% if not g.started %}Start{% else %}Play{% endif %}</td>
+            <td>{% if g.is_startable %}<a href="{{ g.get_absolute_url }}">Start</a>
+                {% else %}{% if game.started %}<a href="{{ g.get_absolute_url }}">Play</a>
+                {% else %}-{% endif %}{% endif %}
+            </td>
         </tr>
     {% endfor %}
     <table>

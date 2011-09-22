@@ -87,5 +87,13 @@ class GameStartView(GameActionView):
     form_class = StartForm
     template_name = 'game/start.html'
 
+    def form_valid(self, form):
+        game = self.object
+        if game.is_startable and game.get_player(self.request.user) is not None:
+            game.start()
+            return redirect(game.get_absolute_url())
+        else:
+            return self.form_invalid(form)
+
 game_start = login_required(GameStartView.as_view())
 

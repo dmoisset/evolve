@@ -3,7 +3,9 @@ import random
 from django.db import models
 from django.contrib.auth.models import User
 
-from evolve.rules.models import City, Variant, Age, Building, BuildOption
+from evolve.rules.models import (
+    City, Variant, Age, Building, BuildOption, PERSONALITY
+)
 from evolve.rules import constants
 
 # Game models where state is kept
@@ -52,6 +54,62 @@ class Game(models.Model):
     def is_startable(self):
         """True if game can be started"""
         return not self.started and self.player_set.count() >= constants.MINIMUM_PLAYERS
+
+    def start(self):
+        """Put the game in its initial state, and ready to play"""
+        assert self.is_startable()
+        assert not self.finished
+        assert self.age == Age.first()
+        assert self.discards.count() == 0
+        assert self.turn == 1
+        # Start!
+        self.started = True
+        self.save()
+        # Shuffle build options for this age
+        self.shuffle()
+
+    def shuffle(self):
+        """Assign to each player the build options"""
+        assert self.started
+        assert not self.finished
+
+        n = self.player_set.count()
+        required_options = n * constants.INITIAL_OPTIONS
+
+        options = list(BuildOption.objects.filter(
+            age=self.age,
+            players_needed__lte=n
+        ).exclude(
+            building__kind__name=PERSONALITY
+        ).order_by('?'))
+        personalities = list(BuildOption.objects.filter(
+            age=self.age,
+            players_needed__lte=n,
+            building__kind__name=PERSONALITY
+        ).order_by('?'))
+
+        # Check that there are enough options for everyone
+        if len(options)+len(personalities) < required_options:
+            raise BuildOption.DoesNotExist
+
+        # Figure out how many personalities to use
+        required_personalities = required_options - len(options)
+        recommended_personalities = 2+n
+        #   actual = Clip recommended in range [required..available]
+        actual_personalities = min(max(recommended_personalities, required_personalities), len(personalities))
+
+        # Remove unused personalities
+        del personalities[actual_personalities:]
+        # Remove unused options, relpace by personalities
+        options[required_options-len(personalities):] = personalities
+        
+        # Now the set of options is built. Assign
+        assert len(options) == required_options
+        for p in self.player_set.all():
+            assert not p.current_options.all() # No options when shuffling
+            p.current_options.add(*options[:constants.INITIAL_OPTIONS])
+            del options[:constants.INITIAL_OPTIONS]
+        
 
     def get_player(self, user):
         """Return player for user, or None if user not part of this game"""

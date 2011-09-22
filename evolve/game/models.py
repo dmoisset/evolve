@@ -155,6 +155,9 @@ class Player(models.Model):
     trade_left = models.PositiveIntegerField(default=0) # Money used in trade with left player
     trade_right = models.PositiveIntegerField(default=0) # Money used in trade with right player
 
+    def can_play(self):
+        return self.game.started and not self.game.finished and self.action != ''
+
     class Meta:
         unique_together = (
             ('city', 'game'), # No two players can have the same city at the same game

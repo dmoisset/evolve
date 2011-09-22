@@ -15,4 +15,5 @@ class JoinForm(forms.Form):
 class StartForm(forms.Form):
     pass
 
-    
+class PlayForm(forms.Form):
+    pass    

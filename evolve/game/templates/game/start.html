@@ -1,0 +1,23 @@
+<h1>Start Game</h1>
+
+<p>Players: {{ game.player_set.all|join:", " }}</p>
+<p>City variants: {{ game.allowed_variants.all|join:", " }}</p>
+
+{% if game.is_startable %}
+    {% if user_in_game %}
+        <form action="" method="POST">
+            <table>
+                {{ form }}
+            </table>
+            {% csrf_token %}
+            <input type="submit">
+        </form>
+
+    {% else %}
+        <p class="error">You should <a href="{{ game.get_absolute_url }}">join</a> this game first</p>
+    {% endif %}
+{% else %}
+    <p class="error">Game can't be started</p>
+{% endif %}
+<a href="{% url games %}">Cancel</a>
+

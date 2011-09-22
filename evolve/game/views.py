@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 
 from evolve.game.models import Game, Player
-from evolve.game.forms import NewGameForm, JoinForm
+from evolve.game.forms import NewGameForm, JoinForm, StartForm
 
 def game_list(request):
     games = Game.objects.filter(finished=False) # Only non finished games   
@@ -41,7 +41,10 @@ def game_detail(request, pk):
     game = get_object_or_404(Game, id=pk)
     player = game.get_player(request.user)
     if player:
-        return # FIXME: view own game
+        if not game.started:
+            return redirect('game-start', pk=pk)
+        else:
+            return # FIXME: view own game
     else:
         if game.is_joinable():
             return redirect('game-join', pk=pk)
@@ -71,4 +74,20 @@ class GameJoinView(SingleObjectMixin, FormView):
         return result
     
 game_join = login_required(GameJoinView.as_view())
+
+class GameStartView(SingleObjectMixin, FormView):
+    model = Game
+    form_class = StartForm
+    template_name = 'game/start.html'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super(GameStartView, self).get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        result = super(GameStartView, self).get_context_data(**kwargs)
+        result['user_in_game'] = self.object.get_player(self.request.user)
+        return result
+
+game_start = login_required(GameStartView.as_view())
 

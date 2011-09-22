@@ -11,3 +11,8 @@ class NewGameForm(forms.ModelForm):
 
 class JoinForm(forms.Form):
     pass
+
+class StartForm(forms.Form):
+    pass
+
+    

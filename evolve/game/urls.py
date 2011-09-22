@@ -5,6 +5,7 @@ urlpatterns = patterns('evolve.game.views',
     url(r'^new/$', 'new_game', name='new-game'),
     url(r'^(?P<pk>\d+)/$', 'game_detail', name='game-detail'),
     url(r'^(?P<pk>\d+)/join/$', 'game_join', name='game-join'),
+    url(r'^(?P<pk>\d+)/start/$', 'game_start', name='game-start'),
 )
 
 # /1/ : Main game screen, redirects according to state: If game...

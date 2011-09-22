@@ -27,7 +27,7 @@ class Game(models.Model):
     def is_joinable(self, user=None):
         """True if the game has still room for more players and user, is specified, isn't already playing"""
         available_cities = City.objects.exclude(player__game=self)
-        user_not_playing = user is None or not bool(self.player_set.filter(user=user))
+        user_not_playing = user is None or not self.get_player(user)
         return not self.started and bool(available_cities) and bool(user_not_playing)
 
     def join(self, user):
@@ -49,6 +49,12 @@ class Game(models.Model):
         player.save()
         # TODO: if all cities assigned, game should auto-start?
         
+    def get_player(self, user):
+        """Return player for user, or None if user not part of this game"""
+        try:
+            return self.player_set.get(user=user)
+        except Player.DoesNotExist:
+            return None
 
     @models.permalink
     def get_absolute_url(self):

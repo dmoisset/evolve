@@ -156,7 +156,7 @@ class Player(models.Model):
     trade_right = models.PositiveIntegerField(default=0) # Money used in trade with right player
 
     def can_play(self):
-        return self.game.started and not self.game.finished and self.action != ''
+        return self.game.started and not self.game.finished and self.action == ''
 
     class Meta:
         unique_together = (

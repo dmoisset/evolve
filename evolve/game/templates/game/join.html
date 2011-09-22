@@ -1,7 +1,7 @@
 <h1>Join Game</h1>
 
 <p>Players: {{ game.player_set.all|join:", " }}</p>
-<p>City variants: {{ game.allowed_variants.all }}</p>
+<p>City variants: {{ game.allowed_variants.all|join:", " }}</p>
 
 <form action="" method="POST">
     <table>

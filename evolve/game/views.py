@@ -30,9 +30,10 @@ class NewGameView(CreateView):
 
     def form_valid(self, form):
         # Create game
-        super(NewGameView, self).form_valid(form)
+        result = super(NewGameView, self).form_valid(form)
         # Join current user to the game
         self.object.join(self.request.user)
+        return result
 
 new_game = login_required(NewGameView.as_view())
 
@@ -51,43 +52,40 @@ def game_detail(request, pk):
         else:
             return # FIXME view game being waited to start
 
-class GameJoinView(SingleObjectMixin, FormView):
+class GameActionView(SingleObjectMixin, FormView):
+    """Base class for actions that operate on games"""
     model = Game
-    form_class = JoinForm
-    template_name = 'game/join.html'
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        return super(GameJoinView, self).get(request, *args, **kwargs)
+        return super(GameActionView, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super(GameActionView, self).post(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        result = super(GameActionView, self).get_context_data(**kwargs)
+        result['user_in_game'] = self.object.get_player(self.request.user)
+        return result
+
+class GameJoinView(GameActionView):
+    form_class = JoinForm
+    template_name = 'game/join.html'
 
     def form_valid(self, form):
-        game = self.object = self.get_object()
+        game = self.object
         if game.is_joinable(self.request.user):
             game.join(self.request.user)
             return redirect(game.get_absolute_url())
         else:
             return self.form_invalid(form)
 
-    def get_context_data(self, **kwargs):
-        result = super(GameJoinView, self).get_context_data(**kwargs)
-        result['user_in_game'] = self.object.get_player(self.request.user)
-        return result
-    
 game_join = login_required(GameJoinView.as_view())
 
-class GameStartView(SingleObjectMixin, FormView):
-    model = Game
+class GameStartView(GameActionView):
     form_class = StartForm
     template_name = 'game/start.html'
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        return super(GameStartView, self).get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        result = super(GameStartView, self).get_context_data(**kwargs)
-        result['user_in_game'] = self.object.get_player(self.request.user)
-        return result
 
 game_start = login_required(GameStartView.as_view())
 

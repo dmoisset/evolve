@@ -56,6 +56,14 @@ class GameJoinView(SingleObjectMixin, FormView):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         return super(GameJoinView, self).get(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        game = self.object = self.get_object()
+        if game.is_joinable(self.request.user):
+            game.join(self.request.user)
+            return redirect(game.get_absolute_url())
+        else:
+            return self.form_invalid(form)
     
 game_join = login_required(GameJoinView.as_view())
 

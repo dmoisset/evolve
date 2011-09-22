@@ -66,7 +66,7 @@ class GameActionView(SingleObjectMixin, FormView):
 
     def get_context_data(self, **kwargs):
         result = super(GameActionView, self).get_context_data(**kwargs)
-        result['user_in_game'] = self.object.get_player(self.request.user)
+        result['player_in_game'] = self.object.get_player(self.request.user)
         return result
 
 class GameJoinView(GameActionView):

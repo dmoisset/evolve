@@ -4,7 +4,7 @@
 <p>City variants: {{ game.allowed_variants.all|join:", " }}</p>
 
 {% if game.is_startable %}
-    {% if user_in_game %}
+    {% if player_in_game %}
         <form action="" method="POST">
             <table>
                 {{ form }}

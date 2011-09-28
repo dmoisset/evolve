@@ -3,6 +3,7 @@
 Basic "rule" models. These are loaded from fixtures and not changed
 during play
 """
+import collections
 
 from django.db import models
 from django.core import validators
@@ -109,6 +110,20 @@ class Cost(models.Model):
     def items(self):
         """Artially prettyprinted version of cost lines. An iterator on strings"""
         return [unicode(l) for l in self.costline_set.all()]
+
+    def to_dict(self):
+        """
+        Dict representation needed in the helper functions on economy.
+        
+        The conversion is a better idea than using the object directly: a lot
+        of copies are created on that functions, and it doesn't make sense
+        to have copies of django models that will never get to the DB
+        """
+        result = collections.defaultdict(lambda:0)
+        result['$'] = self.money
+        for l in self.costline_set.all():
+            result[l.resource.name] = l.amount
+        return result
 
     def __unicode__(self):
         elements = ["$%d" % self.money] if self.money else []

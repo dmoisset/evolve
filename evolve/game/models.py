@@ -67,6 +67,7 @@ class Game(models.Model):
         self.save()
         # Shuffle build options for this age
         self.shuffle()
+    start.alters_data = True
 
     def shuffle(self):
         """Assign to each player the build options"""
@@ -109,7 +110,7 @@ class Game(models.Model):
             assert not p.current_options.all() # No options when shuffling
             p.current_options.add(*options[:constants.INITIAL_OPTIONS])
             del options[:constants.INITIAL_OPTIONS]
-        
+    shuffle.alters_data = True
 
     def get_player(self, user):
         """Return player for user, or None if user not part of this game"""
@@ -155,6 +156,26 @@ class Player(models.Model):
     trade_left = models.PositiveIntegerField(default=0) # Money used in trade with left player
     trade_right = models.PositiveIntegerField(default=0) # Money used in trade with right player
 
+    def active_effects(self):
+        """The set of effects which apply to this player"""
+        # City specials
+        effects = list(Effect.objects.filter(cityspecial__city=self.city, cityspecial__variant=self.variant, order__lt=self.specials_built))
+        # Building effects
+        effects += Effect.objects.filter(building__player=self)
+        return effects
+
+    def left_player(self):
+        try:
+            return self.get_previous_in_order()
+        except:
+            return self.game.player_set.order_by('order')[-1]
+
+    def right_player(self):
+        try:
+            return self.get_next_in_order()
+        except:
+            return self.game.player_set.order_by('order')[0]
+    
     def can_play(self):
         return self.game.started and not self.game.finished and self.action == ''
 

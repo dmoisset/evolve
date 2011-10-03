@@ -1,4 +1,5 @@
 INITIAL_MONEY = 3
+DEFAULT_TRADE_COST = 2
 
 DIRECTIONS = (('l', 'Left'),('r','Right'))
 

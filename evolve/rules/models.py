@@ -26,6 +26,8 @@ KINDS = (
     (PERSONALITY,'Personality'),
 )
 
+TRADEABLE = ('bas','cpx')
+
 class BuildingKind(models.Model):
     """Possible building kinds"""
 
@@ -123,6 +125,18 @@ class Cost(models.Model):
         result['$'] = self.money
         for l in self.costline_set.all():
             result[l.resource.name] = l.amount
+        return result
+
+    def to_list(self):
+        """
+        List representation needed in the helper functions on economy.
+        
+        list of pairs( amount, resource); money is not included, because 
+        this is used for production
+        """
+        result = []
+        for l in self.costline_set.all():
+            result.append(tuple(l.amount, l.resource.name))
         return result
 
     def __unicode__(self):

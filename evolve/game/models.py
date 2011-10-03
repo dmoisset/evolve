@@ -1,10 +1,11 @@
 import random
+import collections
 
 from django.db import models
 from django.contrib.auth.models import User
 
 from evolve.rules.models import (
-    City, Variant, Age, Building, BuildOption, PERSONALITY
+    City, Variant, Age, Building, BuildOption, PERSONALITY, TRADEABLE
 )
 from evolve.rules import constants
 
@@ -146,7 +147,7 @@ class Player(models.Model):
     specials_built = models.PositiveIntegerField(default=0)
     # battle_result_set = results of battles
     buildings = models.ManyToManyField(Building, blank=True, null=True)
-    # Ages whre the special_free_bulding ability has been used already
+    # Ages where the special_free_bulding ability has been used already
     special_free_building_ages_used = models.ManyToManyField(Age, blank=True, null=True)
 
     # Private information, player decisions
@@ -175,6 +176,52 @@ class Player(models.Model):
             return self.get_next_in_order()
         except:
             return self.game.player_set.order_by('order')[0]
+    
+    def tradeable_resources(self):
+        """
+        List of resources that can be bought by neighbors; note that not
+        every resource available is tradeable.
+        
+        This a [[(amount, resource)]]. Inner list are alternative resources
+        """
+        # Basic city resource is tradeable
+        result = [[(1, self.city.resource.name)]]
+        # Add in production of resources by tradeable kinds of buildings
+        for b in self.buildings.filter(kind__in=TRADEABLE):
+            if b.effect.production:
+                result.append(b.effect.production.to_list())
+        return result
+
+    def trade_costs(self, direction):
+        """
+        Costs of trading with player in given direction ('l' or 'r')
+        
+        dict of resource_name -> money
+        """
+        assert direction in ('l', 'r')
+        result = collections.defaultdict(lambda: constants.DEFAULT_TRADE_COST)
+        for e in self.active_effects():
+            if (direction=='l' and e.left_trade) or (direction=='r' and e.right_trade):
+                cost = e.trade.money
+                for _, resource in e.trade.to_list():
+                    # Pick the better value for each resource
+                    result[resource] = min(result[resource], cost)
+        return result
+        
+
+    def local_production(self):
+        """
+        List of resources produced by every local effect (not counting trade)
+        
+        This a [[(amount, resource)]]. Inner list are alternative resources
+        """
+        # Basic city resource is local production
+        result = [[(1, self.city.resource.name)]]
+        # Add in production of resources by tradeable kinds of buildings
+        for e in self.active_effects():
+            if e.production:
+                result.append(e.production.to_list())
+        return result
     
     def can_play(self):
         return self.game.started and not self.game.finished and self.action == ''

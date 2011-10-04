@@ -1,7 +1,7 @@
 from django import forms
 
 from evolve.rules.models import Variant, BuildOption
-from evolve.game.models import Game, ACTIONS
+from evolve.game.models import Game, Player
 
 class NewGameForm(forms.ModelForm):
 
@@ -25,6 +25,6 @@ class PlayForm(forms.Form):
         queryset=BuildOption.objects.none(),
         empty_label=None,
         widget = forms.RadioSelect)
-    action = forms.ChoiceField(ACTIONS)
+    action = forms.ChoiceField(Player.ACTIONS)
     payment = forms.TypedChoiceField(choices=(), coerce=_payment_coerce, empty_value=None)
 

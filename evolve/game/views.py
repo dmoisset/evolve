@@ -4,7 +4,7 @@ from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 
-from evolve.game.models import Game, Player, ACTIONS
+from evolve.game.models import Game, Player
 from evolve.game.forms import NewGameForm, JoinForm, StartForm, PlayForm
 
 def game_list(request):
@@ -114,9 +114,13 @@ class GamePlayView(GameActionView):
         # Set build options for the current player
         form.fields['option'].queryset = player.current_options.all()
         # Remove the free build option if not available
+        actions = Player.ACTIONS
         if not player.can_build_free():
-            actions = [(value, label) for (value, label) in ACTIONS if value != 'free']
-            form.fields['action'].choices = actions
+            actions = [(value, label) for (value, label) in actions if value != Player.FREE_ACTION]
+        # remove the build special option if not available
+        if not player.can_build_special():
+            actions = [(value, label) for (value, label) in actions if value != Player.SPECIAL_ACTION]
+        form.fields['action'].choices = actions
         return form
 
 game_play = login_required(GamePlayView.as_view())

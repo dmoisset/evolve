@@ -5,9 +5,10 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from evolve.rules.models import (
-    City, Variant, Age, Building, BuildOption, Effect, PERSONALITY, TRADEABLE
+    City, CitySpecial, Variant, Age, Building, BuildOption, Effect, PERSONALITY, TRADEABLE
 )
-from evolve.rules import constants
+from evolve.rules import constants, economy
+
 
 # Game models where state is kept
 
@@ -125,16 +126,17 @@ class Game(models.Model):
         return ('game-detail', [], {'pk': self.id})
 
 
-ACTIONS = (
-    ('build', 'Build'),
-    ('free', 'Build(free, use special)'),
-    ('sell', 'Sell'),
-    ('spec', 'Build special'),
-)
-    
-   
 class Player(models.Model):
     """Single player information for given game"""
+
+    FREE_ACTION = 'free'
+    SPECIAL_ACTION = 'spec'
+    ACTIONS = (
+        ('build', 'Build'),
+        (FREE_ACTION, 'Build(free, use special)'),
+        ('sell', 'Sell'),
+        (SPECIAL_ACTION, 'Build special'),
+    )
     
     user = models.ForeignKey(User)
     game = models.ForeignKey(Game)
@@ -241,6 +243,32 @@ class Player(models.Model):
         if special_free_building_ages_used.filter(game=self.game): return False
         # Otherwise, the effect can be used
         return True
+
+    def can_build_special(self):
+        """
+        True if player can use the 'build special' action. Needs to have an
+        available special, and resources to pay for it
+        """
+        # This only makes sense on started games
+        if not self.game.started: return False
+        # Check that there is a next special to build
+        specials = CitySpecial.objects.filter(city=self.city, variant=self.variant, order__gte=self.specials_built).order_by('order')
+        if not specials: return False
+        # Check that the player can pay for the special
+        special = specials[0] # This is the next to build
+        return bool(self.payment_options(special.cost))
+
+    def payment_options(self, cost):
+        """List of ways of paying for cost. Empty if unpayable"""
+        return economy.get_payments(
+            cost.to_dict(),
+            self.money,
+            self.local_production(),
+            self.left_player().tradeable_resources(),
+            self.trade_costs('l'),
+            self.right_player().tradeable_resources(),
+            self.trade_costs('r'),
+        )            
 
     class Meta:
         unique_together = (

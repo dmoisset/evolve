@@ -1,6 +1,6 @@
 from django.template.response import TemplateResponse
 from django.views.generic.edit import CreateView, FormView
-from django.views.generic.detail import SingleObjectMixin
+from django.views.generic.detail import SingleObjectMixin, DetailView
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 
@@ -50,8 +50,7 @@ def game_detail(request, pk):
         elif player.can_play():
             return redirect('game-play', pk=pk)
         else:
-            print "waiting"
-            return # FIXME: view own game
+            return redirect('game-wait', pk=pk)
     else:
         if game.is_joinable():
             return redirect('game-join', pk=pk)
@@ -149,4 +148,10 @@ class GamePlayView(GameActionView):
             return self.form_invalid(form)
 
 game_play = login_required(GamePlayView.as_view())
+
+class GameWaitView(DetailView):
+    model = Game
+    template_name = 'game/wait.html'
+
+game_wait = login_required(GameWaitView.as_view())
 

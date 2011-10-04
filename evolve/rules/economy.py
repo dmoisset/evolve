@@ -130,3 +130,12 @@ def get_payments_base(cost, money, local_resources, left_resources, left_costs, 
     else:
         return [] # Can't afford
 
+def can_pay(options, left, right):
+    """
+    Given a list of payment options, check that it can be paid in some way using the exact given amount of trade.
+    Returns the option for doing so or None otherwise
+    """
+    for o in options:
+        if o.left_trade.cost()==left and o.right_trade.cost()==right:
+            return o
+

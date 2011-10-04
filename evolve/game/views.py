@@ -136,5 +136,17 @@ class GamePlayView(GameActionView):
         form.player = player
         return form
 
+    def form_valid(self, form):
+        game = self.object
+        player = game.get_player(self.request.user)
+        if player.can_play():
+            payment = form.cleaned_data.get('payment')
+            option = form.cleaned_data.get('option')
+            action = form.cleaned_data.get('action')
+            player.play(action, option, payment[1], payment[2])
+            return redirect(game.get_absolute_url())
+        else:
+            return self.form_invalid(form)
+
 game_play = login_required(GamePlayView.as_view())
 

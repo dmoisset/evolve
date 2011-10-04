@@ -121,6 +121,18 @@ class Game(models.Model):
         except Player.DoesNotExist:
             return None
 
+    def end_of_turn(self):
+        for p in self.player_set.all():
+            p.reset_action()
+    end_of_turn.alters_data = True
+
+    def turn_check(self):
+        """Checks if we need to do end of turn"""
+        missing_players = self.player_set.filter(action='')
+        if not missing_players:
+            self.end_of_turn()
+    turn_check.alters_data = True
+
     @models.permalink
     def get_absolute_url(self):
         return ('game-detail', [], {'pk': self.id})
@@ -157,7 +169,7 @@ class Player(models.Model):
 
     # Private information, player decisions
     current_options = models.ManyToManyField(BuildOption, blank=True, null=True)
-    card_picked = models.ForeignKey(BuildOption, blank=True, null=True, related_name='picker_set')
+    option_picked = models.ForeignKey(BuildOption, blank=True, null=True, related_name='picker_set')
     action = models.CharField(max_length=5, choices=ACTIONS, blank=True)
     trade_left = models.PositiveIntegerField(default=0) # Money used in trade with left player
     trade_right = models.PositiveIntegerField(default=0) # Money used in trade with right player
@@ -244,6 +256,42 @@ class Player(models.Model):
         if special_free_building_ages_used.filter(game=self.game): return False
         # Otherwise, the effect can be used
         return True
+
+    def play(self, action, option, trade_left, trade_right):
+        """
+        Choose to play the given action with the given build option.
+        
+        Note that this is the selection of the option, the action is not applied
+        until the end of turn (which is checked at the end of this method).
+        
+        Preconditions:
+         - action is one of the Player.ACTIONS
+         - option in self.current_options.all()
+         - option == FREE_ACTION implies self.can_build_free()
+         - option == SPECIAL_ACTION implies self.can_build_special()
+         - option == BUILD_ACTION implies option.cost can be paid with given trade
+        """
+        assert action in (name for name,label in self.ACTIONS)
+        assert option in self.current_options.all()
+        assert option != self.FREE_ACTION or self.can_build_free()
+        assert option != self.SPECIAL_ACTION or self.can_build_special()
+        assert option != self.BUILD_ACTION or economy.can_pay(self.payment_options(option.cost), trade_left, trade_right)
+        
+        self.action = action
+        self.option_picked = option
+        self.trade_left = trade_left
+        self.trade_right = trade_right
+        self.save()
+        
+        self.game.turn_check()
+
+    def reset_action(self):
+        self.aption = ''
+        self.option_picked = None
+        self.trade_left = 0
+        self.trade_right = 0
+        self.save()
+    reset_action.alters_data = True
 
     def next_special(self):
         """

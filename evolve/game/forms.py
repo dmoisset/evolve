@@ -16,8 +16,10 @@ class StartForm(forms.Form):
     pass
 
 def _payment_coerce(value):
-    i, j = map(int, value.split(','))
-    return i,j
+    if value[0]!='(' or value[-1]!=')': raise ValueError
+    value = value[1:-1]
+    id, l, r = map(int, value.split(','))
+    return id,l,r
 
 class PlayForm(forms.Form):
 
@@ -28,3 +30,4 @@ class PlayForm(forms.Form):
     action = forms.ChoiceField(Player.ACTIONS)
     payment = forms.TypedChoiceField(choices=(), coerce=_payment_coerce, empty_value=None)
 
+    

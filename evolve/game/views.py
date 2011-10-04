@@ -121,6 +121,13 @@ class GamePlayView(GameActionView):
         if not player.can_build_special():
             actions = [(value, label) for (value, label) in actions if value != Player.SPECIAL_ACTION]
         form.fields['action'].choices = actions
+        # Compute payments
+        payment = []
+        for o in player.current_options.all():
+            pay_options = player.payment_options(o.building.cost)
+            for po in pay_options:
+                payment.append(((o.id, po.left_trade.cost(), po.right_trade.cost()),u"%s %s" % (o.building, po)))
+        form.fields['payment'].choices = payment                
         return form
 
 game_play = login_required(GamePlayView.as_view())

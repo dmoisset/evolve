@@ -31,6 +31,11 @@ class PaymentOption(object):
         """
         return (self.left_trade.cost() < other.left_trade.cost()) and (self.right_trade.cost() < other.right_trade.cost())
 
+    def __unicode__(self):
+        left = self.left_trade.cost()
+        right = self.right_trade.cost()
+        return "$%d ($%d left, $%d right)" % (self.money+left+right, left, right)
+
 
 def empty_cost(cost):
     # cost is a dict, {resource_name: required_amount}. It also maps '$' to the needed money

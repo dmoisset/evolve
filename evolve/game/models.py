@@ -5,7 +5,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from evolve.rules.models import (
-    City, Variant, Age, Building, BuildOption, PERSONALITY, TRADEABLE
+    City, Variant, Age, Building, BuildOption, Effect, PERSONALITY, TRADEABLE
 )
 from evolve.rules import constants
 
@@ -124,15 +124,17 @@ class Game(models.Model):
     def get_absolute_url(self):
         return ('game-detail', [], {'pk': self.id})
 
+
+ACTIONS = (
+    ('build', 'Build'),
+    ('free', 'Build(free, use special)'),
+    ('sell', 'Sell'),
+    ('spec', 'Build special'),
+)
+    
+   
 class Player(models.Model):
     """Single player information for given game"""
-    
-    ACTIONS = (
-        ('build', 'Build'),
-        ('free', 'Build(free, use special)'),
-        ('sell', 'Sell'),
-        ('spec', 'Build special'),
-    )
     
     user = models.ForeignKey(User)
     game = models.ForeignKey(Game)
@@ -160,9 +162,9 @@ class Player(models.Model):
     def active_effects(self):
         """The set of effects which apply to this player"""
         # City specials
-        effects = list(Effect.objects.filter(cityspecial__city=self.city, cityspecial__variant=self.variant, order__lt=self.specials_built))
+        city_effects = Effect.objects.filter(cityspecial__city=self.city, cityspecial__variant=self.variant, cityspecial__order__lt=self.specials_built)
         # Building effects
-        effects += Effect.objects.filter(building__player=self)
+        effects = city_effects | Effect.objects.filter(building__player=self)
         return effects
 
     def left_player(self):
@@ -225,6 +227,20 @@ class Player(models.Model):
     
     def can_play(self):
         return self.game.started and not self.game.finished and self.action == ''
+
+    def can_build_free(self):
+        """
+        True if player can use the 'free building' effect. Needs to have the
+        effect available, and not already used in this age.
+        """
+        # This only makes sense on started games
+        if not self.game.started: return False
+        # Check that the player has the free build ability
+        if not self.active_effects().filter(free_building=True): return False
+        # Check that the effect hasn't been already used
+        if special_free_building_ages_used.filter(game=self.game): return False
+        # Otherwise, the effect can be used
+        return True
 
     class Meta:
         unique_together = (

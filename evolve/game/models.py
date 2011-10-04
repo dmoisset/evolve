@@ -186,13 +186,13 @@ class Player(models.Model):
         try:
             return self.get_previous_in_order()
         except:
-            return self.game.player_set.order_by('order')[-1]
+            return self.game.player_set.order_by('-_order')[0]
 
     def right_player(self):
         try:
             return self.get_next_in_order()
         except:
-            return self.game.player_set.order_by('order')[0]
+            return self.game.player_set.order_by('_order')[0]
     
     def tradeable_resources(self):
         """
@@ -286,7 +286,7 @@ class Player(models.Model):
         self.game.turn_check()
 
     def reset_action(self):
-        self.aption = ''
+        self.action = ''
         self.option_picked = None
         self.trade_left = 0
         self.trade_right = 0

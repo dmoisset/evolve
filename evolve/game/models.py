@@ -129,10 +129,11 @@ class Game(models.Model):
 class Player(models.Model):
     """Single player information for given game"""
 
+    BUILD_ACTION= 'build'
     FREE_ACTION = 'free'
     SPECIAL_ACTION = 'spec'
     ACTIONS = (
-        ('build', 'Build'),
+        (BUILD_ACTION, 'Build'),
         (FREE_ACTION, 'Build(free, use special)'),
         ('sell', 'Sell'),
         (SPECIAL_ACTION, 'Build special'),
@@ -244,6 +245,14 @@ class Player(models.Model):
         # Otherwise, the effect can be used
         return True
 
+    def next_special(self):
+        """
+        Next special to build, None if all built
+        """
+        specials = CitySpecial.objects.filter(city=self.city, variant=self.variant, order__gte=self.specials_built).order_by('order')
+        if specials:
+            return specials[0]
+
     def can_build_special(self):
         """
         True if player can use the 'build special' action. Needs to have an
@@ -252,10 +261,9 @@ class Player(models.Model):
         # This only makes sense on started games
         if not self.game.started: return False
         # Check that there is a next special to build
-        specials = CitySpecial.objects.filter(city=self.city, variant=self.variant, order__gte=self.specials_built).order_by('order')
-        if not specials: return False
+        special = self.next_special()
+        if special is None: return False
         # Check that the player can pay for the special
-        special = specials[0] # This is the next to build
         return bool(self.payment_options(special.cost))
 
     def payment_options(self, cost):

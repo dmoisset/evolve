@@ -127,7 +127,13 @@ class GamePlayView(GameActionView):
             pay_options = player.payment_options(o.building.cost)
             for po in pay_options:
                 payment.append(((o.id, po.left_trade.cost(), po.right_trade.cost()),u"%s %s" % (o.building, po)))
+        if player.can_build_special():
+            pay_options = player.payment_options(player.next_special().cost)
+            for po in pay_options:
+                payment.append(((-1, po.left_trade.cost(), po.right_trade.cost()),u"%s %s" % ("Special", po)))
         form.fields['payment'].choices = payment                
+        # Add metadata:
+        form.player = player
         return form
 
 game_play = login_required(GamePlayView.as_view())

@@ -30,4 +30,11 @@ class PlayForm(forms.Form):
     action = forms.ChoiceField(Player.ACTIONS)
     payment = forms.TypedChoiceField(choices=(), coerce=_payment_coerce, empty_value=None)
 
-    
+    def clean(self):
+        payment = self.cleaned_data.get('payment')
+        option = self.cleaned_data.get('option')
+        action = self.cleaned_data.get('action')
+        if payment and option and action:
+            if (payment[0] == -1 and action != Player.SPECIAL_ACTION) or (option.id != payment[0] and action==Player.BUILD_ACTION):
+                raise forms.ValidationError("That is not a valid payment for the selected option")
+        return self.cleaned_data

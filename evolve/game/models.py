@@ -315,8 +315,17 @@ class Player(models.Model):
         # Check that the player can pay for the special
         return bool(self.payment_options(special.cost))
 
+    def count(self, kind):
+        """Number of buildings of a given kind"""
+        return self.buildings.filter(kind=kind).count()
+    
+    def specials(self):
+        """Number of specials built"""
+        return self.specials_built
+
     def payment_options(self, cost):
         """List of ways of paying for cost. Empty if unpayable"""
+        # FIXME: what about free chains?
         return economy.get_payments(
             cost.to_dict(),
             self.money,

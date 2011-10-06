@@ -361,7 +361,7 @@ class Player(models.Model):
     def apply_action(self):
         """Apply action played"""
         assert self.action
-        if self.action == SELL_ACTION:
+        if self.action == self.SELL_ACTION:
             # Sell: discard the option
             self.game.discard(self.option)
             # Get money
@@ -369,7 +369,7 @@ class Player(models.Model):
 
             self.save()
 
-        elif self.action == BUILD_ACTION:
+        elif self.action == self.BUILD_ACTION:
             # Check payment
             payment = economy.can_pay(
                 self.payment_options(self.option_picked.building.cost), 
@@ -394,7 +394,7 @@ class Player(models.Model):
                 self.right_player()
             )
             self.save()
-        elif self.action == FREE_ACTION:
+        elif self.action == self.FREE_ACTION:
             assert self.can_build_free()
             # "Pay" with one use of the ability. No actual costs, but ability is disabled for this age
             special_free_building_ages_used.add(self.game.age)
@@ -406,7 +406,7 @@ class Player(models.Model):
             )
             self.save()
             # Build
-        elif self.action == SPECIAL_ACTION:
+        elif self.action == self.SPECIAL_ACTION:
             assert self.can_build_special()
             special = self.next_special()
             # Check payment

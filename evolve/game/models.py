@@ -155,10 +155,10 @@ class Game(models.Model):
             p.apply_action()
         # Rotate available options
         opts = [list(p.current_options.all()) for p in self.player_set.all()]
-        if self.age.directions=='l':
+        if self.age.direction=='l':
             opts = opts[1:]+opts[:1]
         else:
-            assert self.age.directions=='r'
+            assert self.age.direction=='r'
             opts = opts[-1:]+opts[:-1]
         for p, os in zip(self.player_set.all(), opts):
             p.current_options.clear()
@@ -363,7 +363,7 @@ class Player(models.Model):
         assert self.action
         if self.action == self.SELL_ACTION:
             # Sell: discard the option
-            self.game.discard(self.option)
+            self.game.discard(self.option_picked)
             # Get money
             self.money += constants.SELL_VALUE
 
@@ -438,7 +438,7 @@ class Player(models.Model):
         else:
             raise AssertionError
         # Option no longer available
-        self.current_options.remove(self.option)
+        self.current_options.remove(self.option_picked)
     apply_action.alters_data = True
 
     def next_special(self):

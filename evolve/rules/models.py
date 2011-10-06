@@ -241,6 +241,29 @@ class Effect(models.Model):
     use_discards = models.BooleanField()
     copy_personality = models.BooleanField()
     
+    def money(self, local, left, right):
+        """
+        Money produced by this effect for local when its neighbors are left
+        and right.
+        
+        local, left, right are Player-like objects, i.e., they just need to have
+        the following methods:
+           - count(kind): returning number of buildings of given kind
+           - specials(): number of specials built
+        """
+        result = 0
+        if self.production:
+            result += self.production.money
+        if self.money_per_neighbor_building:
+            result += self.money_per_neighbor_building * (left.count(self.kind_payed)+right.count(self.kind_payed))
+        if self.money_per_local_building:
+            result += self.money_per_local_building * local.count(self.kind_payed)
+        if self.money_per_neighbor_special:
+            result += self.money_per_neighbor_special * (left.specials()+right.specials())
+        if self.money_per_local_special:
+            result += self.money_per_local_special * local.specials()
+        return result
+    
     def clean(self):
         # trade should be set iff a direction is
         has_trade_1 = self.trade is not None

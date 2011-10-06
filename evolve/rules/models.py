@@ -95,8 +95,8 @@ class Age(models.Model):
     def next(self):
         """Returns next age, or none if this is the last one"""
         try:
-            return Age.objects.filter(order__gt=self.order).get()
-        except Age.DoesNotExist:
+            return Age.objects.filter(order__gt=self.order)[0]
+        except IndexError:
             return None
 
     def __unicode__(self):

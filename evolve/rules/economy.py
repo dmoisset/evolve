@@ -27,9 +27,9 @@ class PaymentOption(object):
         """
         Is this payment option strictly "better" than an alternative?
         
-        Better means that in needs strictly less money in each direction
+        Better means that in needs no more money in any direction, and strictly less money in at least one direction
         """
-        return (self.left_trade.cost() < other.left_trade.cost()) and (self.right_trade.cost() < other.right_trade.cost())
+        return (self.left_trade.cost() <= other.left_trade.cost()) and (self.right_trade.cost() <= other.right_trade.cost())
 
     def __unicode__(self):
         left = self.left_trade.cost()

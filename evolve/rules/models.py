@@ -303,7 +303,12 @@ class Effect(models.Model):
             trade += "/".join(self.trade.items())
             trade += " >" if self.right_trade else ""
             items.append(trade)
-        # TODO: Score/money per specials
+        if self.money_per_local_building:
+            items.append("$%d/%s v" % (self.money_per_local_building, self.kind_payed))
+        if self.money_per_neighbor_building:
+            items.append("$%d/%s < >" % (self.money_per_neighbor_building, self.kind_payed))
+        # Score per local/neighbor buildings
+        # TODO: Score per specials
         # TODO: score per defeats
         # TODO: specials
 

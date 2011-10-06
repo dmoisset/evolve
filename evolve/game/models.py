@@ -143,11 +143,12 @@ class Player(models.Model):
 
     BUILD_ACTION= 'build'
     FREE_ACTION = 'free'
+    SELL_ACTION = 'sell'
     SPECIAL_ACTION = 'spec'
     ACTIONS = (
         (BUILD_ACTION, 'Build'),
         (FREE_ACTION, 'Build(free, use special)'),
-        ('sell', 'Sell'),
+        (SELL_ACTION, 'Sell'),
         (SPECIAL_ACTION, 'Build special'),
     )
     

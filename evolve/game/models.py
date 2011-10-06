@@ -354,8 +354,8 @@ class Player(models.Model):
         assert self.action
         # Buildings need to be added first, so applied effects related to
         # existing buildings count other buildings built in the same turn
-        if self.action in (BUILD_ACTION, FREE_ACTION):
-            self.buildings.add(self.option.building)
+        if self.action in (self.BUILD_ACTION, self.FREE_ACTION):
+            self.buildings.add(self.option_picked.building)
         
         
     def apply_action(self):
@@ -372,7 +372,7 @@ class Player(models.Model):
         elif self.action == BUILD_ACTION:
             # Check payment
             payment = economy.can_pay(
-                self.payment_options(self.option.building.cost), 
+                self.payment_options(self.option_picked.building.cost), 
                 self.trade_left,
                 self.trade_right
             )
@@ -388,7 +388,7 @@ class Player(models.Model):
                 self.right_player().save()
             self.money -= payment.money
             # Earn money if building produces money
-            self.money += self.option.building.effect.money(
+            self.money += self.option_picked.building.effect.money(
                 self,
                 self.left_player(),
                 self.right_player()
@@ -399,7 +399,7 @@ class Player(models.Model):
             # "Pay" with one use of the ability. No actual costs, but ability is disabled for this age
             special_free_building_ages_used.add(self.game.age)
             # Earn money if building produces money
-            self.money += self.option.building.effect.money(
+            self.money += self.option_picked.building.effect.money(
                 self,
                 self.left_player(),
                 self.right_player()

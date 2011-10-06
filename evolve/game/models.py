@@ -323,6 +323,11 @@ class Player(models.Model):
         """Number of specials built"""
         return self.specials_built
 
+    def military(self):
+        """Military power"""
+        # Just the sum of the military powers of each effect
+        return self.active_effects().aggregate(models.Sum('military'))
+
     def payment_options(self, cost):
         """List of ways of paying for cost. Empty if unpayable"""
         # FIXME: what about free chains?

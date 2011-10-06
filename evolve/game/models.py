@@ -328,7 +328,7 @@ class Player(models.Model):
         assert option in self.current_options.all()
         assert option != self.FREE_ACTION or self.can_build_free()
         assert option != self.SPECIAL_ACTION or self.can_build_special()
-        assert option != self.BUILD_ACTION or economy.can_pay(self.payment_options(option.cost), trade_left, trade_right)
+        assert option != self.BUILD_ACTION or economy.can_pay(self.payment_options(option.building), trade_left, trade_right)
         
         self.action = action
         self.option_picked = option
@@ -372,7 +372,7 @@ class Player(models.Model):
         elif self.action == self.BUILD_ACTION:
             # Check payment
             payment = economy.can_pay(
-                self.payment_options(self.option_picked.building.cost), 
+                self.payment_options(self.option_picked.building), 
                 self.trade_left,
                 self.trade_right
             )
@@ -460,7 +460,7 @@ class Player(models.Model):
         special = self.next_special()
         if special is None: return False
         # Check that the player can pay for the special
-        return bool(self.payment_options(special.cost))
+        return bool(self.payment_options(special))
 
     def count(self, kind):
         """Number of buildings of a given kind"""
@@ -475,11 +475,11 @@ class Player(models.Model):
         # Just the sum of the military powers of each effect
         return self.active_effects().aggregate(models.Sum('military'))
 
-    def payment_options(self, cost):
-        """List of ways of paying for cost. Empty if unpayable"""
+    def payment_options(self, item):
+        """List of ways of paying for item.cost. Empty if unpayable"""
         # FIXME: what about free chains?
         return economy.get_payments(
-            cost.to_dict(),
+            item.cost.to_dict(),
             self.money,
             self.local_production(),
             self.left_player().tradeable_resources(),

@@ -143,7 +143,7 @@ class Cost(models.Model):
         """
         result = []
         for l in self.costline_set.all():
-            result.append(tuple(l.amount, l.resource.name))
+            result.append((l.amount, l.resource.name))
         return result
 
     def __unicode__(self):

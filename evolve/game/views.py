@@ -123,11 +123,11 @@ class GamePlayView(GameActionView):
         # Compute payments
         payment = []
         for o in player.current_options.all():
-            pay_options = player.payment_options(o.building.cost)
+            pay_options = player.payment_options(o.building)
             for po in pay_options:
                 payment.append(((o.id, po.left_trade.cost(), po.right_trade.cost()),u"%s %s" % (o.building, po)))
         if player.can_build_special():
-            pay_options = player.payment_options(player.next_special().cost)
+            pay_options = player.payment_options(player.next_special())
             for po in pay_options:
                 payment.append(((-1, po.left_trade.cost(), po.right_trade.cost()),u"%s %s" % ("Special", po)))
         form.fields['payment'].choices = payment                

@@ -478,7 +478,7 @@ class Player(models.Model):
         """List of ways of paying for item.cost. Empty if unpayable"""
         # Check if we have a dependency of this item that makes it free:
         if hasattr(item, 'free_having'):
-            if self.buildings.filter(id=item.free_having.id).exists():
+            if item.free_having in self.buildings.all():
                 # You can get it for free. No more options needed
                 return [economy.PaymentOption()]
         return economy.get_payments(

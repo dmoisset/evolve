@@ -122,23 +122,23 @@ class Game(models.Model):
             return None
 
     def end_of_age(self):
+        # discard cards for all players
+        for p in self.player_set.all():
+            self.discards.add(*p.current_options.all())
+            p.current_options.clear()
+        # Battles
+        for p in self.player_set.all():
+            for neighbor, d in zip((p.left_player(), p.right_player()),'lr'):
+                local = p.military()
+                foreign = neighbor.military()
+                if local != foreign: # There was a winner
+                    result = 'v' if local > foreign else 'd'
+                    BattleResult.objects.create(owner=p, direction=d, age=self.age, result=result)
         next_age = self.age.next()
         if next_age is None:
             self.finished = True
             self.save()
         else:
-            # discard cards for all players
-            for p in self.player_set.all():
-                self.discards.add(*p.current_options.all())
-                p.current_options.clear()
-            # Battles
-            for p in self.player_set.all():
-                for neighbor, d in zip((p.left_player(), p.right_player()),'lr'):
-                    local = p.military()
-                    foreign = neighbor.military()
-                    if local != foreign: # There was a winner
-                        result = 'v' if local > foreign else 'd'
-                        BattleResult.objects.create(owner=p, direction=d, age=self.age, result=result)
             # Increase age
             self.age = next_age
             self.turn = 1

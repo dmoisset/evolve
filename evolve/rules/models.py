@@ -337,7 +337,7 @@ class Building(models.Model):
     effect = models.ForeignKey(Effect)
 
     cost = models.ForeignKey(Cost)
-    free_having = models.ForeignKey('self', blank=True, null=True) # This models is free when having other bulding
+    free_having = models.ManyToManyField('self', blank=True, null=True) # This models is free when having other bulding
 
     def __unicode__(self):        
         return self.name

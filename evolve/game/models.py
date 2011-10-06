@@ -438,7 +438,7 @@ class Player(models.Model):
         else:
             raise AssertionError
         # Option no longer available
-        self.options.remove(self.option)
+        self.current_options.remove(self.option)
     apply_action.alters_data = True
 
     def next_special(self):

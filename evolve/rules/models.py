@@ -92,6 +92,13 @@ class Age(models.Model):
         """First Age"""
         return cls.objects.order_by('order')[0]
 
+    def next(self):
+        """Returns next age, or none if this is the last one"""
+        try:
+            return Age.objects.filter(order__gt=self.order).get()
+        except Age.DoesNotExist:
+            return None
+
     def __unicode__(self):
         return self.name
 

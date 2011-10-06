@@ -20,9 +20,17 @@ class CitySpecialInline(admin.TabularInline):
 class CityAdmin(admin.ModelAdmin):
     inlines = [CitySpecialInline]
 
+class BuildingAdmin(admin.ModelAdmin):
+    list_display = ('name', 'kind', 'cost','effect')
+    list_filter = ('kind',)
+
+class BuildOptionAdmin(admin.ModelAdmin):
+    list_display = ('building', 'players_needed', 'age')
+    list_filter = ('players_needed','age')
+
 admin.site.register(City, CityAdmin)
-admin.site.register(Building)
-admin.site.register(BuildOption)
+admin.site.register(Building, BuildingAdmin)
+admin.site.register(BuildOption, BuildOptionAdmin)
 
 class CostLineInline(admin.TabularInline):
     model = CostLine

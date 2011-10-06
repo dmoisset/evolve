@@ -477,7 +477,11 @@ class Player(models.Model):
 
     def payment_options(self, item):
         """List of ways of paying for item.cost. Empty if unpayable"""
-        # FIXME: what about free chains?
+        # Check if we have a dependency of this item that makes it free:
+        if hasattr(item, 'free_having'):
+            if self.buildings.filter(id=item.free_having.id).exists():
+                # You can get it for free. No more options needed
+                return [economy.PaymentOption()]
         return economy.get_payments(
             item.cost.to_dict(),
             self.money,

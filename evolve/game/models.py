@@ -355,8 +355,23 @@ class Player(models.Model):
         # Buildings need to be added first, so applied effects related to
         # existing buildings count other buildings built in the same turn
         if self.action in (self.BUILD_ACTION, self.FREE_ACTION):
+            if self.action==self.BUILD_ACTION:
+                item = self.option_picked.building
+            else:
+                item = self.next_special() 
+            # Check payment. This needs to be done before building, so raising
+            # a commercial building does not affect its own price, and building
+            # a resource does not allow to pay for itself.
+            # Anyway, build options should try to avoid that happening
+            payment = economy.can_pay(
+                self.payment_options(item), 
+                self.trade_left,
+                self.trade_right
+            )
+            assert payment is not None
+            # Pay local money. Trade is handled later
+            self.money -= payment.money
             self.buildings.add(self.option_picked.building)
-        
         
     def apply_action(self):
         """Apply action played"""
@@ -370,13 +385,6 @@ class Player(models.Model):
             self.save()
 
         elif self.action == self.BUILD_ACTION:
-            # Check payment
-            payment = economy.can_pay(
-                self.payment_options(self.option_picked.building), 
-                self.trade_left,
-                self.trade_right
-            )
-            assert payment is not None
             # Pay!
             if self.trade_left:
                 self.left_player().money += self.trade_left
@@ -386,7 +394,6 @@ class Player(models.Model):
                 self.right_player().money += self.trade_right
                 self.money -= self.trade_right
                 self.right_player().save()
-            self.money -= payment.money
             # Earn money if building produces money
             self.money += self.option_picked.building.effect.money(
                 self,
@@ -409,13 +416,6 @@ class Player(models.Model):
         elif self.action == self.SPECIAL_ACTION:
             assert self.can_build_special()
             special = self.next_special()
-            # Check payment
-            payment = economy.can_pay(
-                self.payment_options(special), 
-                self.trade_left,
-                self.trade_right
-            )
-            assert payment is not None
             # Pay!
             if self.trade_left:
                 self.left_player().money += self.left_trade
@@ -425,7 +425,6 @@ class Player(models.Model):
                 self.right_player().money += self.right_trade
                 self.money -= self.right_trade
                 self.right_player().save()
-            self.money -= payment.money
             # Earn money if building produces money
             self.money += special.effect.money(
                 self,

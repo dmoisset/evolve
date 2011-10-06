@@ -121,7 +121,55 @@ class Game(models.Model):
         except Player.DoesNotExist:
             return None
 
+    def end_of_age(self):
+        next_age = self.age.next()
+        if next_age is None:
+            self.finished = True
+            self.save()
+        else:
+            # discard cards for all players
+            for p in self.player_set.all():
+                self.discards.add(*p.current_options.all())
+                p.current_options.clear()
+            # Battles
+            for p in self.player_set.all():
+                for neighbor, d in zip((p.left_player(), p.right_player()),'lr'):
+                    local = p.military()
+                    foreign = neighbor.military()
+                    if local != foreign: # There was a winner
+                        result = 'v' if local > foreign else 'd'
+                        BattleResult.objects.create(owner=p, direction=d, age=self.age, result=result)
+            # Increase age
+            self.age = next_age
+            self.turn = 1
+            # new cards
+            self.save()
+            self.shuffle()
+    end_of_age.alters_data = True
+
     def end_of_turn(self):
+        # Apply all player actions, in two stages
+        for p in self.player_set.all():
+            p.pre_apply_action()
+        for p in self.player_set.all():
+            p.apply_action()
+        # Rotate available options
+        opts = [list(p.current_options.all()) for p in self.player_set.all()]
+        if self.age.directions=='l':
+            opts = opts[1:]+opts[:1]
+        else:
+            assert self.age.directions=='r'
+            opts = opts[-1:]+opts[:-1]
+        for p, os in zip(self.player_set.all(), opts):
+            p.current_options.clear()
+            p.current_options.add(*os)
+        # increase turn counter
+        self.turn += 1
+        if self.turn > constants.TURN_COUNT:
+            self.end_of_age()
+        else:
+            self.save()
+        # Reset players so they can play again
         for p in self.player_set.all():
             p.reset_action()
     end_of_turn.alters_data = True
@@ -132,6 +180,10 @@ class Game(models.Model):
         if not missing_players:
             self.end_of_turn()
     turn_check.alters_data = True
+
+    def discard(self, option):
+        """Discard one option"""
+        self.discards.add(option)
 
     @models.permalink
     def get_absolute_url(self):
@@ -293,6 +345,101 @@ class Player(models.Model):
         self.trade_right = 0
         self.save()
     reset_action.alters_data = True
+
+    def pre_apply_action(self):
+        """
+        Pre-apply action played
+        (actions are applied in two phases)
+        """
+        assert self.action
+        # Buildings need to be added first, so applied effects related to
+        # existing buildings count other buildings built in the same turn
+        if self.action in (BUILD_ACTION, FREE_ACTION):
+            self.buildings.add(self.option.building)
+        
+        
+    def apply_action(self):
+        """Apply action played"""
+        assert self.action
+        if self.action == SELL_ACTION:
+            # Sell: discard the option
+            self.game.discard(self.option)
+            # Get money
+            self.money += constants.SELL_VALUE
+
+            self.save()
+
+        elif self.action == BUILD_ACTION:
+            # Check payment
+            payment = economy.can_pay(
+                self.payment_options(self.option.building.cost), 
+                self.trade_left,
+                self.trade_right
+            )
+            assert payment is not None
+            # Pay!
+            if self.trade_left:
+                self.left_player().money += self.left_trade
+                self.money -= self.left_trade
+                self.left_player().save()
+            if self.trade_right:
+                self.right_player().money += self.right_trade
+                self.money -= self.right_trade
+                self.right_player().save()
+            self.money -= payment.money
+            # Earn money if building produces money
+            self.money += self.option.building.effect.money(
+                self,
+                self.left_player(),
+                self.right_player()
+            )
+            self.save()
+        elif self.action == FREE_ACTION:
+            assert self.can_build_free()
+            # "Pay" with one use of the ability. No actual costs, but ability is disabled for this age
+            special_free_building_ages_used.add(self.game.age)
+            # Earn money if building produces money
+            self.money += self.option.building.effect.money(
+                self,
+                self.left_player(),
+                self.right_player()
+            )
+            self.save()
+            # Build
+        elif self.action == SPECIAL_ACTION:
+            assert self.can_build_special()
+            special = self.next_special()
+            # Check payment
+            payment = economy.can_pay(
+                self.payment_options(special), 
+                self.trade_left,
+                self.trade_right
+            )
+            assert payment is not None
+            # Pay!
+            if self.trade_left:
+                self.left_player().money += self.left_trade
+                self.money -= self.left_trade
+                self.left_player().save()
+            if self.trade_right:
+                self.right_player().money += self.right_trade
+                self.money -= self.right_trade
+                self.right_player().save()
+            self.money -= payment.money
+            # Earn money if building produces money
+            self.money += special.effect.money(
+                self,
+                self.left_player(),
+                self.right_player()
+            )
+            # "Build"
+            self.specials_built = special.order + 1
+            self.save()
+        else:
+            raise AssertionError
+        # Option no longer available
+        self.options.remove(self.option)
+    apply_action.alters_data = True
 
     def next_special(self):
         """

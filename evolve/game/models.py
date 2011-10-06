@@ -379,12 +379,12 @@ class Player(models.Model):
             assert payment is not None
             # Pay!
             if self.trade_left:
-                self.left_player().money += self.left_trade
-                self.money -= self.left_trade
+                self.left_player().money += self.trade_left
+                self.money -= self.trade_left
                 self.left_player().save()
             if self.trade_right:
-                self.right_player().money += self.right_trade
-                self.money -= self.right_trade
+                self.right_player().money += self.trade_right
+                self.money -= self.trade_right
                 self.right_player().save()
             self.money -= payment.money
             # Earn money if building produces money

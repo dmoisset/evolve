@@ -1,8 +1,10 @@
 INITIAL_MONEY = 3
 DEFAULT_TRADE_COST = 2
+SELL_VALUE = 3 # Money earned by selling
 
 DIRECTIONS = (('l', 'Left'),('r','Right'))
 
 MINIMUM_PLAYERS = 3
 
 INITIAL_OPTIONS = 7
+TURN_COUNT = INITIAL_OPTIONS - 1

@@ -275,12 +275,9 @@ class Effect(models.Model):
         has_pay_2 = self.money_per_local_building > 0 or self.money_per_neighbor_building > 0
         if has_pay_1 != has_pay_2:
             raise ValidationError('Set kind_payed attribute along money_per_*')
-        # score per building type should be set if score_per is
-        if self.pk is not None: # Avoid checking before first save
-            has_score_1 = bool(self.kinds_scored.all())
-            has_score_2 = self.score_per_local_building > 0 or self.score_per_neighbor_building > 0
-            if has_score_1 != has_score_2:
-                raise ValidationError('Set kind_scored attribute along score_per_*')
+        # score per building type should be set if score_per is. but
+        # kinds_scored is M2M, which are set after clean() so we can't validate
+        # here. That step is checked during form validation
     
     def __unicode__(self):
         items = []
@@ -307,7 +304,10 @@ class Effect(models.Model):
             items.append("$%d/%s v" % (self.money_per_local_building, self.kind_payed))
         if self.money_per_neighbor_building:
             items.append("$%d/%s < >" % (self.money_per_neighbor_building, self.kind_payed))
-        # Score per local/neighbor buildings
+        if self.score_per_local_building:
+            items.append("%dpt/%s v" % (self.score_per_local_building, ','.join(unicode(k) for k in self.kinds_scored.all())))
+        if self.score_per_neighbor_building:
+            items.append("%dpt/%s < >" % (self.score_per_neighbor_building, ','.join(unicode(k) for k in self.kinds_scored.all())))
         # TODO: Score per specials
         # TODO: score per defeats
         # TODO: specials

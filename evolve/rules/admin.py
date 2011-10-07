@@ -6,6 +6,8 @@ from evolve.rules.models import (
     Age, City, CitySpecial, Building, BuildOption, Cost, CostLine, Effect,
     Building, BuildOption
 )
+from evolve.rules.forms import EffectForm
+
 site=AdminSite('rules')
 
 site.register(BuildingKind)
@@ -28,6 +30,9 @@ class BuildOptionAdmin(admin.ModelAdmin):
     list_display = ('building', 'players_needed', 'age')
     list_filter = ('players_needed','age')
 
+class EffectAdmin(admin.ModelAdmin):
+    form = EffectForm
+
 admin.site.register(City, CityAdmin)
 admin.site.register(Building, BuildingAdmin)
 admin.site.register(BuildOption, BuildOptionAdmin)
@@ -39,7 +44,7 @@ class CostAdmin(admin.ModelAdmin):
     inlines = [CostLineInline]
 
 admin.site.register(Cost, CostAdmin)
-admin.site.register(Effect)
+admin.site.register(Effect, EffectAdmin)
 
 
 

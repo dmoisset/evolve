@@ -308,7 +308,9 @@ class Effect(models.Model):
             items.append("%dpt/%s v" % (self.score_per_local_building, ','.join(unicode(k) for k in self.kinds_scored.all())))
         if self.score_per_neighbor_building:
             items.append("%dpt/%s < >" % (self.score_per_neighbor_building, ','.join(unicode(k) for k in self.kinds_scored.all())))
-        # TODO: Score per specials
+        if self.money_per_local_special or self.score_per_local_special:
+            items.append("($%d+%dpt)/Special" % (self.money_per_local_special, self.score_per_local_special))
+        # TODO: Score per neighbor specials
         # TODO: score per defeats
         # TODO: specials
 

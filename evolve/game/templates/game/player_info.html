@@ -1,0 +1,13 @@
+<p>You: {{ player }}</p>
+<p>City: {{ player.city }} / {{ player.variant }}</p>
+<p>Money: ${{ player.money }}</p>
+
+<p>Buildings:</p>
+
+<ul>
+    <li><b>City produces:</b> {{ player.city.resource }}</li>
+    {% for b in player.buildings.all %}
+    <li><strong>{{ b }}:</strong> {{ b.effect }}</li>
+    {% endfor %}
+</ul>
+

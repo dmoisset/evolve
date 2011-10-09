@@ -21,9 +21,15 @@ def _payment_coerce(value):
     id, l, r = map(int, value.split(','))
     return id,l,r
 
+
+class OptionField(forms.ModelChoiceField):
+
+    def label_from_instance(self, obj):
+        return "%s / cost=%s / effect=%s" % (obj.building, obj.building.cost, obj.building.effect)
+
 class PlayForm(forms.Form):
 
-    option = forms.ModelChoiceField(
+    option = OptionField(
         queryset=BuildOption.objects.none(),
         empty_label=None,
         widget = forms.RadioSelect)

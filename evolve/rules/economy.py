@@ -52,7 +52,7 @@ def get_payments(cost, money, local_resources, left_resources, left_costs, right
             if c.better_than(o): break
         else: # If no item in clean_results better than o
             clean_results.append(o)
-    return results
+    return clean_results
 
 def get_payments_base(cost, money, local_resources, left_resources, left_costs, right_resources, right_costs):
     # cost is a dict, {resource_name: required_amount}. It also maps '$' to the needed money

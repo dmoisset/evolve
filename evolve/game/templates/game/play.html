@@ -7,7 +7,17 @@
 {% if player_in_game.can_play %}
     <form action="" method="POST">
         <table>
-            {{ form }}
+            <tr><th>{{ form.option.label }}</th>
+                <td>{{ form.option }}</td>
+                <td><ul>{% for o in player_in_game.current_options.all %}<li>{{ o.building.cost }}</li>{% endfor %}</ul></td>
+                <td><ul>{% for o in player_in_game.current_options.all %}<li>{{ o.building.effect }}</li>{% endfor %}</ul></td>
+            </tr>
+            <tr><th>{{ form.action.label }}</th>
+                <td>{{ form.action }}</td>
+            </tr>
+            <tr><th>{{ form.payment.label }}</th>
+                <td>{{ form.payment }}</td>
+            </tr>
         </table>
         {% csrf_token %}
         <input type="submit">

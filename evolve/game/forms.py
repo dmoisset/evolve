@@ -25,7 +25,7 @@ def _payment_coerce(value):
 class OptionField(forms.ModelChoiceField):
 
     def label_from_instance(self, obj):
-        return "%s / cost=%s / effect=%s" % (obj.building, obj.building.cost, obj.building.effect)
+        return "%s" % obj.building
 
 class PlayForm(forms.Form):
 

@@ -121,7 +121,7 @@ class GamePlayView(GameActionView):
             actions = [(value, label) for (value, label) in actions if value != Player.SPECIAL_ACTION]
         form.fields['action'].choices = actions
         # Compute payments
-        payment = []
+        payment = [((0,0,0), '---')]
         for o in player.current_options.all():
             pay_options = player.payment_options(o.building)
             for po in pay_options:

@@ -16,6 +16,10 @@ class StartForm(forms.Form):
     pass
 
 def _payment_coerce(value):
+    if not value:
+        # Empty value (for example when selling samething that can't be payed)
+        return 0,0,0
+
     if value[0]!='(' or value[-1]!=')': raise ValueError
     value = value[1:-1]
     id, l, r = map(int, value.split(','))
@@ -34,7 +38,7 @@ class PlayForm(forms.Form):
         empty_label=None,
         widget = forms.RadioSelect)
     action = forms.ChoiceField(Player.ACTIONS)
-    payment = forms.TypedChoiceField(choices=(), coerce=_payment_coerce, empty_value=None)
+    payment = forms.TypedChoiceField(choices=(), coerce=_payment_coerce, required=False)
 
     def clean(self):
         payment = self.cleaned_data.get('payment')

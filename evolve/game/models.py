@@ -103,8 +103,10 @@ class Game(models.Model):
 
         # Remove unused personalities
         del personalities[actual_personalities:]
-        # Remove unused options, relpace by personalities
+        # Remove unused options, replace by personalities
         options[required_options-len(personalities):] = personalities
+        # Reshuffle, to mix personalities and the rest of the options
+        random.shuffle(options)
         
         # Now the set of options is built. Assign
         assert len(options) == required_options

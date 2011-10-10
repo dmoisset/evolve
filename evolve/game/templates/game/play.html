@@ -12,12 +12,24 @@
                 <td><ul>{% for o in player_in_game.current_options.all %}<li>{{ o.building.cost }}</li>{% endfor %}</ul></td>
                 <td><ul>{% for o in player_in_game.current_options.all %}<li>{{ o.building.effect }}</li>{% endfor %}</ul></td>
             </tr>
+            {% if form.option.errors %}
+            <tr><td colspan="3">{{ form.option.errors }}</td></tr>
+            {% endif %}
             <tr><th>{{ form.action.label }}</th>
                 <td>{{ form.action }}</td>
             </tr>
+            {% if form.action.errors %}
+            <tr><td colspan="3">{{ form.action.errors }}</td></tr>
+            {% endif %}
             <tr><th>{{ form.payment.label }}</th>
                 <td>{{ form.payment }}</td>
             </tr>
+            {% if form.payment.errors %}
+            <tr><td colspan="3">{{ form.payment.errors }}</td></tr>
+            {% endif %}
+            {% if form.errors %}
+            <tr><td colspan="3">{{ form.non_field_errors }}</td></tr>
+            {% endif %}
         </table>
         {% csrf_token %}
         <input type="submit">

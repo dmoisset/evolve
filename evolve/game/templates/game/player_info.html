@@ -1,8 +1,8 @@
-<p>You: {{ player }}</p>
+<h2>{{ player }}</h2>
 <p>City: {{ player.city }} / {{ player.variant }}</p>
 <p>Money: ${{ player.money }}</p>
 
-<p>Buildings:</p>
+<h3>Buildings:</h3>
 
 <ul>
     <li><b>City produces:</b> {{ player.city.resource }}</li>
@@ -10,4 +10,17 @@
     <li><strong>{{ b }}:</strong> {{ b.effect }}</li>
     {% endfor %}
 </ul>
+
+<h3>Specials:</h3>
+
+<p>Built: {{ player.specials }}
+{% if player.next_special %}
+<p>Cost of next: {{ player.next_special.cost }}</p>
+{% endif %}
+
+<ol>
+{% for s in player.all_specials %}
+<li>{{ s.effect }}</li>
+{% endfor %}
+</ol>
 

@@ -5,6 +5,8 @@
 {% include "game/player_info.html" with player=player_in_game %}
 
 {% if player_in_game.can_play %}
+    <h3>Next action</h3>
+
     <form action="" method="POST">
         <table>
             <tr><th>{{ form.option.label }}</th>

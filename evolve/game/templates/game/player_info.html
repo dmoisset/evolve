@@ -20,7 +20,7 @@
 
 <ol>
 {% for s in player.all_specials %}
-<li>{{ s.effect }}</li>
+<li>{{ s.effect }} ({{s.cost}})</li>
 {% endfor %}
 </ol>
 

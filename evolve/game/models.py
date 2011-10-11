@@ -471,6 +471,10 @@ class Player(models.Model):
         """Number of specials built"""
         return self.specials_built
 
+    def all_specials(self):
+        """The complete list of specials for our city+variant"""
+        return CitySpecial.objects.filter(city=self.city, variant=self.variant).order_by('order')
+
     def military(self):
         """Military power"""
         # Just the sum of the military powers of each effect

@@ -13,15 +13,17 @@ def game_list(request):
         my_games = games.filter(player__user=request.user)
         open_games = games.exclude(player__user=request.user).filter(started=False)
         started_games = games.exclude(player__user=request.user).filter(started=True)
+        finished_games = Game.objects.filter(player__user=request.user, finished=True)
     else:
         my_games = games.none()
         open_games = games.filter(started=False)
         started_games = games.filter(started=True)
-            
+        finished_games = games.none()
     return TemplateResponse(request, 'game/list.html', {
         'my_games': my_games,
         'open_games': open_games,
         'started_games': started_games,
+        'finished_games': finished_games,
     })
 
 class NewGameView(CreateView):

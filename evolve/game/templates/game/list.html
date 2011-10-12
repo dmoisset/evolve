@@ -27,7 +27,7 @@
             </td>
         </tr>
     {% endfor %}
-    <table>
+    </table>
 
 {% endif %}
 
@@ -51,7 +51,7 @@
         </tr>
         {% endif %}
     {% endfor %}
-    <table>
+    </table>
 {% endif %}
 
 {% if started_games %}
@@ -60,6 +60,25 @@
 <p>Games in progress</p>
 {% endif %}
 
-{% if not my_games and not open_games and not started_games %}
+{% if finished_games %}
+<h2>Finished games</h2>
+
+    <table border="1">
+        <tr>
+            <th>Players</th>
+            <th>Status</th>
+        </tr>
+    {% for g in finished_games %}
+        <tr>
+            <td>{{ g.player_set.all|join:", "|default:"No players" }}</td>
+            <td>Finished</td>
+            <td><a href="{{ g.get_absolute_url }}">View</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+
+{% endif %}
+
+{% if not my_games and not open_games and not started_games and not finished_games %}
 <p>No games</p>
 {% endif %}

@@ -24,3 +24,12 @@
 {% endfor %}
 </ol>
 
+{% if player.battleresult_set.all %}
+<h3>Combat</h3>
+
+<ul>
+{% for r in player.battleresult_set.all %}
+    <li>{{ r.age }}: {{ r.score|stringformat:"+d" }} ({{ r.get_direction_display }})</li>
+{% endfor %}
+</ul>
+{% endif %}

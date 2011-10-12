@@ -520,4 +520,11 @@ class BattleResult(models.Model):
     direction = models.CharField(max_length=1, choices=constants.DIRECTIONS)
     result = models.CharField(max_length=1, choices=(('v', 'Victory'),('d','Defeat')))
 
-
+    def score(self):
+        if self.result == 'v':
+            return self.age.victory_score
+        else: 
+            return self.age.defeat_score
+        
+    class Meta:
+        ordering = ('age',)

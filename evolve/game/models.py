@@ -249,6 +249,19 @@ class Player(models.Model):
         except:
             return self.game.player_set.order_by('_order')[0]
     
+    def all_right_players(self):
+        """
+        A list of every player except self and player at the left, starting
+        by the player at the right and going around to the right
+        """
+        p = self.right_player()
+        result = []
+        for _ in range(self.game.player_set.count()-2):
+            result.append(p)
+            p = p.right_player()
+        assert p == self.left_player()
+        return result
+    
     def tradeable_resources(self):
         """
         List of resources that can be bought by neighbors; note that not

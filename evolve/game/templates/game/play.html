@@ -3,6 +3,7 @@
 <p>Players: {{ game.player_set.all|join:", " }}</p>
 
 {% include "game/player_info.html" with player=player_in_game %}
+{% include "game/player_info.html" with player=player_in_game.left_player %}
 
 {% if player_in_game.can_play %}
     <h3>Next action</h3>
@@ -41,4 +42,8 @@
     <p class="error">You can't play now</p>
 {% endif %}
 <a href="{% url games %}">Cancel</a>
+
+{% for p in player_in_game.all_right_players %}
+    {% include "game/player_info.html" with player=p %}
+{% endfor %}
 

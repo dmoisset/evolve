@@ -1,0 +1,23 @@
+<h1>Finished Game: Scoreboard</h1>
+
+
+<table>
+    <tr>
+        {% for p in game.player_set.all %}
+            <th>{{ p }}</th>
+        {% endfor %}
+    </tr>
+    <tr>
+        {% for p in game.player_set.all %}
+            <td>{{ p.score }}</td>
+        {% endfor %}
+    </tr>
+    <tr>
+        {% for p in game.player_set.all %}
+            <td>{{ p.score.total }}</td>
+        {% endfor %}
+    </tr>
+</table>
+
+<a href="{% url games %}">Back to listing</a>
+

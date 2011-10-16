@@ -44,8 +44,7 @@ def game_detail(request, pk):
     game = get_object_or_404(Game, id=pk)
     player = game.get_player(request.user)
     if game.finished:
-        print "finished"
-        return # FIXME: show score
+        return redirect('game-score', pk=pk)
     elif player:
         if not game.started:
             return redirect('game-start', pk=pk)
@@ -156,4 +155,11 @@ class GameWaitView(DetailView):
     template_name = 'game/wait.html'
 
 game_wait = login_required(GameWaitView.as_view())
+
+class GameScoreView(DetailView):
+    model = Game
+    template_name = 'game/score.html'
+
+game_score = login_required(GameWaitView.as_view())
+
 

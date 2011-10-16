@@ -28,6 +28,19 @@ KINDS = (
 
 TRADEABLE = ('bas','cpx')
 
+class Score(collections.namedtuple('Score', 'treasury military special civilian economy science personality')):
+    
+    @classmethod
+    def new(cls):
+        return cls(0,0,0,0,0,0,0)
+
+    def __add__(self, other):
+        sums = [x+y for x,y in zip(self, other)]
+        return Score(*sums)
+
+    def total(self):
+        return sum(self._asdict().values())
+
 class BuildingKind(models.Model):
     """Possible building kinds"""
 
@@ -241,6 +254,26 @@ class Effect(models.Model):
     use_discards = models.BooleanField()
     copy_personality = models.BooleanField()
     
+    def score(self, local, left, right):
+        """
+        Score (as an int, not a Score() instance) produced by this effect
+        
+        local, left, right are Player-like objects, i.e., they just need to have
+        the following methods:
+           - count(kind): returning number of buildings of given kind
+           - specials(): number of specials built        
+           - defeats(): number of defeats suffered        
+        """
+        result = self.score
+        for k in self.kinds_scored.all():
+            result += self.score_per_local_building * local.count(k)
+            result += self.score_per_neighbor_building * left.count(k)
+            result += self.score_per_neighbor_building * right.count(k)
+        result += self.score_per_local_special * local.specials()
+        result += self.score_per_neighbor_special * (left.specials() + right.specials())
+        result += self.score_per_neighbor_defeat * (left.defeats() + right.defeats())
+        return result
+    
     def money(self, local, left, right):
         """
         Money produced by this effect for local when its neighbors are left
@@ -345,6 +378,21 @@ class Building(models.Model):
 
     cost = models.ForeignKey(Cost)
     free_having = models.ManyToManyField('self', blank=True, null=True) # This models is free when having other bulding
+
+    def score(self):
+        """
+        Score() object for this building
+        """
+        amount = self.effect.score()
+        if self.kind == 'eco': # FIXME: hardcoded constant
+            return Score.new()._replace(economy=amount)
+        elif self.kind == 'civ': # FIXME: hardcoded constant
+            return Score.new()._replace(civilian=amount)
+        elif self.kind == PERSONALITY:
+            return Score.new()._replace(personality=amount)
+        else:
+            assert amount == 0
+            return Score.new()
 
     def __unicode__(self):        
         return self.name

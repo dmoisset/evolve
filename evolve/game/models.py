@@ -5,7 +5,9 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from evolve.rules.models import (
-    City, CitySpecial, Variant, Age, Building, BuildOption, Effect, PERSONALITY, TRADEABLE
+    Score,
+    City, CitySpecial, Variant, Age, Building, BuildOption, Effect,
+    PERSONALITY, TRADEABLE
 )
 from evolve.rules import constants, economy
 
@@ -484,6 +486,10 @@ class Player(models.Model):
         """Number of specials built"""
         return self.specials_built
 
+    def defeats(self):
+        """Number of defeats suffered"""
+        return self.battleresult_set.filter(result='d') # FIXME: hardcoded constant
+
     def all_specials(self):
         """The complete list of specials for our city+variant"""
         return CitySpecial.objects.filter(city=self.city, variant=self.variant).order_by('order')
@@ -492,6 +498,50 @@ class Player(models.Model):
         """Military power"""
         # Just the sum of the military powers of each effect
         return self.active_effects().aggregate(models.Sum('military'))
+
+    def science_score(self):
+        """Amount of science points"""
+        ### Science score
+        # Build auxiliar science class
+        sciences = Science.objects.values_list('name', flat=True)
+        ScienceScore = collections.namedtuple('ScienceScore', ' '.join(sciences))
+        # compute list of science producing effects
+        options = [e.sciences.all() for e in self.active_effects() if e.sciences.count()]
+        
+        combinations = oldcombinations = set([ScienceScore(*[0]*len(sciences))]) # Science score for a player with no science effects
+        for o in options:
+            combinations = set()
+            for science in o:
+                for b in oldcombinations:
+                    combinations.add(b._replace(**{science.name: getattr(b, science)+1}))
+            oldcombinations = combinations
+
+        result = 0
+        for s in combinations:
+            value = min(s)*constants.SCIENCE_SCORE_PER_GROUP + sum(amount**2 for amount in s)
+            result = max(science_score, value)
+        return result
+    
+    def score(self):
+        """Score for this player"""
+        treasury_score = self.money // 3
+
+        military_score = sum(b.score() for b in battleresult_set.all())
+
+        specials_built = Effect.objects.filter(cityspecial__city=self.city, cityspecial__variant=self.variant, cityspecial__order__lt=self.specials_built)    
+        special_score = sum(s.score() for s in specials_built)
+        
+        # Accumulate building effects
+        result = Score.new()._replace(
+            treasury=treasury_score,
+            military=military_score,
+            special=special_score,
+            science=self.science_score()
+        )
+        for b in self.buildings.all():
+            result = result + b.score()
+
+        return result
 
     def payment_options(self, item):
         """List of ways of paying for item.cost. Empty if unpayable"""

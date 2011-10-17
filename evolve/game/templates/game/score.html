@@ -3,16 +3,49 @@
 
 <table>
     <tr>
+        <th></th>
         {% for p in game.player_set.all %}
             <th>{{ p }}</th>
         {% endfor %}
     </tr>
     <tr>
+        <th>Military</th>
         {% for p in game.player_set.all %}
-            <td>{{ p.score }}</td>
+            <td>{{ p.score.military }}</td>
         {% endfor %}
     </tr>
     <tr>
+        <th>Treasury</th>
+        {% for p in game.player_set.all %}
+            <td>{{ p.score.treasury }}</td>
+        {% endfor %}
+    </tr>
+    <tr>
+        <th>Specials</th>
+        {% for p in game.player_set.all %}
+            <td>{{ p.score.special }}</td>
+        {% endfor %}
+    </tr>
+    <tr>
+        <th>Civilian</th>
+        {% for p in game.player_set.all %}
+            <td>{{ p.score.civilian }}</td>
+        {% endfor %}
+    </tr>
+    <tr>
+        <th>Science</th>
+        {% for p in game.player_set.all %}
+            <td>{{ p.score.science }}</td>
+        {% endfor %}
+    </tr>
+    <tr>
+        <th>Economy</th>
+        {% for p in game.player_set.all %}
+            <td>{{ p.score.economy }}</td>
+        {% endfor %}
+    </tr>
+    <tr>
+        <th>Total</th>
         {% for p in game.player_set.all %}
             <td>{{ p.score.total }}</td>
         {% endfor %}

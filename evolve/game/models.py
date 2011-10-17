@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 
 from evolve.rules.models import (
     Score,
-    City, CitySpecial, Variant, Age, Building, BuildOption, Effect,
+    City, CitySpecial, Variant, Age, Building, BuildOption, Effect, Science,
     PERSONALITY, TRADEABLE
 )
 from evolve.rules import constants, economy
@@ -488,7 +488,7 @@ class Player(models.Model):
 
     def defeats(self):
         """Number of defeats suffered"""
-        return self.battleresult_set.filter(result='d') # FIXME: hardcoded constant
+        return self.battleresult_set.filter(result='d').count() # FIXME: hardcoded constant
 
     def all_specials(self):
         """The complete list of specials for our city+variant"""
@@ -513,23 +513,23 @@ class Player(models.Model):
             combinations = set()
             for science in o:
                 for b in oldcombinations:
-                    combinations.add(b._replace(**{science.name: getattr(b, science)+1}))
+                    combinations.add(b._replace(**{science.name: getattr(b, science.name)+1}))
             oldcombinations = combinations
 
         result = 0
         for s in combinations:
             value = min(s)*constants.SCIENCE_SCORE_PER_GROUP + sum(amount**2 for amount in s)
-            result = max(science_score, value)
+            result = max(result, value)
         return result
     
     def score(self):
         """Score for this player"""
         treasury_score = self.money // 3
 
-        military_score = sum(b.score() for b in battleresult_set.all())
+        military_score = sum(b.score() for b in self.battleresult_set.all())
 
         specials_built = Effect.objects.filter(cityspecial__city=self.city, cityspecial__variant=self.variant, cityspecial__order__lt=self.specials_built)    
-        special_score = sum(s.score() for s in specials_built)
+        special_score = sum(s.get_score(self, self.left_player(), self.right_player()) for s in specials_built)
         
         # Accumulate building effects
         result = Score.new()._replace(
@@ -539,7 +539,7 @@ class Player(models.Model):
             science=self.science_score()
         )
         for b in self.buildings.all():
-            result = result + b.score()
+            result = result + b.score(self, self.left_player(), self.right_player())
 
         return result
 

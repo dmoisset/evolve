@@ -254,7 +254,7 @@ class Effect(models.Model):
     use_discards = models.BooleanField()
     copy_personality = models.BooleanField()
     
-    def score(self, local, left, right):
+    def get_score(self, local, left, right):
         """
         Score (as an int, not a Score() instance) produced by this effect
         
@@ -379,16 +379,16 @@ class Building(models.Model):
     cost = models.ForeignKey(Cost)
     free_having = models.ManyToManyField('self', blank=True, null=True) # This models is free when having other bulding
 
-    def score(self):
+    def score(self, local, left, right):
         """
         Score() object for this building
         """
-        amount = self.effect.score()
-        if self.kind == 'eco': # FIXME: hardcoded constant
+        amount = self.effect.get_score(local, left, right)
+        if self.kind.name == 'eco': # FIXME: hardcoded constant
             return Score.new()._replace(economy=amount)
-        elif self.kind == 'civ': # FIXME: hardcoded constant
+        elif self.kind.name == 'civ': # FIXME: hardcoded constant
             return Score.new()._replace(civilian=amount)
-        elif self.kind == PERSONALITY:
+        elif self.kind.name == PERSONALITY:
             return Score.new()._replace(personality=amount)
         else:
             assert amount == 0

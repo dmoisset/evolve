@@ -343,9 +343,18 @@ class Effect(models.Model):
             items.append("%dpt/%s < >" % (self.score_per_neighbor_building, ','.join(unicode(k) for k in self.kinds_scored.all())))
         if self.money_per_local_special or self.score_per_local_special:
             items.append("($%d+%dpt)/Special" % (self.money_per_local_special, self.score_per_local_special))
-        # TODO: Score per neighbor specials
-        # TODO: score per defeats
-        # TODO: specials
+        if self.money_per_neighbor_special or self.score_per_neighbor_special:
+            items.append("($%d+%dpt)/Special < >" % (self.money_per_neighbor_special, self.score_per_neighbor_special))
+        if self.score_per_neighbor_defeat:
+            items.append("%dpt/defeat < >" % self.score_per_neighbor_defeat)
+        if self.free_building:
+            items.append("1 Free builing per age")
+        if self.extra_turn:
+            items.append("Can build last option")
+        if self.use_discards:
+            items.append("Build one discarded option")
+        if self.copy_personality:
+            items.append("Apply one personality option from a neighbor")
 
         return ", ".join(items)
 

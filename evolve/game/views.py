@@ -160,6 +160,6 @@ class GameScoreView(DetailView):
     model = Game
     template_name = 'game/score.html'
 
-game_score = login_required(GameScoreView.as_view())
+game_score = GameScoreView.as_view()
 
 

@@ -57,7 +57,21 @@
 {% if started_games %}
 <h2>Games in progress</h2>
 
-<p>Games in progress</p>
+    <table border="1">
+        <tr>
+            <th>Players</th>
+            <th>Status</th>
+            <th>Start/Play</th>
+        </tr>
+    {% for g in started_games %}
+        <tr>
+            <td>{{ g.player_set.all|join:", "|default:"No players" }}</td>
+            <td>Age {{ g.age }} Round {{ g.turn }}</td>
+            <td><a href="{% url game-watch pk=g.pk %}">Watch</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+
 {% endif %}
 
 {% if finished_games %}

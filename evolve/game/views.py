@@ -56,8 +56,7 @@ def game_detail(request, pk):
         if game.is_joinable():
             return redirect('game-join', pk=pk)
         else:
-            print "observing"
-            return # FIXME view game
+            return redirect('game-watch', pk=pk)
 
 class GameActionView(SingleObjectMixin, FormView):
     """Base class for actions that operate on games"""
@@ -162,4 +161,9 @@ class GameScoreView(DetailView):
 
 game_score = GameScoreView.as_view()
 
+class GameWatchView(DetailView):
+    model = Game
+    template_name = 'game/watch.html'
+
+game_watch = GameWatchView.as_view()
 

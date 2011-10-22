@@ -348,7 +348,7 @@ class Effect(models.Model):
         if self.score_per_neighbor_defeat:
             items.append("%dpt/defeat < >" % self.score_per_neighbor_defeat)
         if self.free_building:
-            items.append("1 Free builing per age")
+            items.append("1 Free building per age")
         if self.extra_turn:
             items.append("Can build last option")
         if self.use_discards:

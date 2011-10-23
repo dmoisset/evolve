@@ -1,0 +1,11 @@
+{% extends "game/base.html" %}
+{% block contents %}
+
+<h1>Play Game</h1>
+
+<p>Players: {{ game.player_set.all|join:", " }}</p>
+
+{% for player in game.player_set.all %}
+    {% include "game/player_info.html" %}
+{% endfor %}
+{% endblock %}

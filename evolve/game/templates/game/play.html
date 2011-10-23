@@ -1,12 +1,35 @@
 {% extends "game/base.html" %}
+
+{% block extrahead %}
+    <script>
+        $(function() {
+            $( "#players" ).tabs().tabs('select', 1);
+        });
+    </script>
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/play.css"/>
+{% endblock %}
 {% block contents %}
+
 
 <h1>Play Game</h1>
 
-<p>Players: {{ game.player_set.all|join:", " }}</p>
+<div id="players">
+    <ul>
+        <li><a href="#player-info-{{player_in_game.left_player.pk}}">{{ player_in_game.left_player }}</a></li>
+        <li class="current-player"><a href="#player-info-{{player_in_game.pk}}">{{ player_in_game }}</a></li>
+        {% for p in player_in_game.all_right_players %}
+            <li><a href="#player-info-{{p.pk}}">{{ p }}</a></li>
+        {% endfor %}
+    </ul>
 
-{% include "game/player_info.html" with player=player_in_game %}
-{% include "game/player_info.html" with player=player_in_game.left_player %}
+    {% include "game/player_info.html" with player=player_in_game.left_player %}
+    {% include "game/player_info.html" with player=player_in_game %}
+
+    {% for p in player_in_game.all_right_players %}
+        {% include "game/player_info.html" with player=p %}
+    {% endfor %}
+</div>
+
 
 {% if player_in_game.can_play %}
     <h3>Next action</h3>
@@ -44,11 +67,8 @@
 {% else %}
     <p class="error">You can't play now</p>
 {% endif %}
-<a href="{% url games %}">Cancel</a>
 
-{% for p in player_in_game.all_right_players %}
-    {% include "game/player_info.html" with player=p %}
-{% endfor %}
+<a href="{% url games %}">Cancel</a>
 
 {% endblock %}
 

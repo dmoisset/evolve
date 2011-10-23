@@ -1,3 +1,6 @@
+{% extends "game/base.html" %}
+{% block contents %}
+
 <h1>Games</h1>
 
 {% if user.is_authenticated %}
@@ -96,3 +99,4 @@
 {% if not my_games and not open_games and not started_games and not finished_games %}
 <p>No games</p>
 {% endif %}
+{% endblock %}

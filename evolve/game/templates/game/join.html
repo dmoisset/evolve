@@ -1,3 +1,6 @@
+{% extends "game/base.html" %}
+{% block contents %}
+
 <h1>Join Game</h1>
 
 <p>Players: {{ game.player_set.all|join:", " }}</p>
@@ -20,4 +23,4 @@
     <p class="error">Game can't be joined</p>
 {% endif %}
 <a href="{% url games %}">Cancel</a>
-
+{% endblock %}

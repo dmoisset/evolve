@@ -21,6 +21,38 @@ body {
     padding-top: 0;
 }
 
+.neighbors p {
+    margin: 0;
+}
+
+.neighbors {
+    margin: -12px -1.4em;
+    font-size: 80%
+}
+
+.neighbors a {
+    color: #5b97ff;
+}
+
+.neighbors ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.neighbors .left {
+    float: left;
+    margin: 0;
+}
+
+.neighbors .right {
+    float: right;
+    margin: 0;
+}
+
+.building-list {
+    clear: both;
+}
+
 ul.building-set {
     float:left;
     min-height:100px;

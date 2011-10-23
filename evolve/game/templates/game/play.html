@@ -3,7 +3,17 @@
 {% block extrahead %}
     <script>
         $(function() {
-            $( "#players" ).tabs().tabs('select', 1);
+            var $tabs = $("#players").tabs(); /* Enable tabs*/
+            $tabs.tabs('select', 1); /* Select player tab */
+            
+            /* Attach navigation links to tabs */
+            var leftlinks = $(".neighbors a");
+            for (i=0; i < leftlinks.length; i++) {
+                $(leftlinks[i]).click(function () {
+                    $tabs.tabs('select', this.hash);
+                });
+            }
+            
         });
     </script>
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/play.css"/>

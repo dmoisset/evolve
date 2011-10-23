@@ -5,15 +5,36 @@
     <h3>{{ player.city }} ({{ player.variant }})</p>
 </div>
 
-{% regroup player.building_list by kind as kinds %}
+<div class="neighbors">
+    <div class="left">
+        <p><a href="#player-info-{{ player.left_player.pk }}">« {{ player.left_player.city  }} ({{ player.left_player }})</a></p>
+        <ul>
+        {% for r in player.battleresult_set.all %}{% if r.direction == 'l' %}
+            <li>{{ r.age }}: {{ r.score|stringformat:"+d" }}</li>
+        {% endif%}{% endfor %}
+        </ul>
+    </div>
+    <div class="right">
+        <p><a href="#player-info-{{ player.right_player.pk }}">{{ player.right_player.city }} ({{ player.right_player }}) »</a></p>
+        <ul>
+        {% for r in player.battleresult_set.all %}{% if r.direction == 'r' %}
+            <li>{{ r.age }}: {{ r.score|stringformat:"+d" }}</li>
+        {% endif%}{% endfor %}
+        </ul>
+    </div>
+</div>
 
-{% for k in kinds %}
-    <ul class="kind-{{ k.grouper }} building-set ui-corner-all">
-    {% for b in k.list %}
-       <li><strong>{{ b.label }}:</strong> {{ b.effect }}</li>
+<div class="building-list">
+    {% regroup player.building_list by kind as kinds %}
+
+    {% for k in kinds %}
+        <ul class="kind-{{ k.grouper }} building-set ui-corner-all">
+        {% for b in k.list %}
+           <li><strong>{{ b.label }}:</strong> {{ b.effect }}</li>
+        {% endfor %}
+        </ul>
     {% endfor %}
-    </ul>
-{% endfor %}
+</div>
 
 <h3 style="clear:both;">Specials:</h3>
 
@@ -28,13 +49,4 @@
 {% endfor %}
 </ol>
 
-{% if player.battleresult_set.all %}
-<h3>Combat</h3>
-
-<ul>
-{% for r in player.battleresult_set.all %}
-    <li>{{ r.age }}: {{ r.score|stringformat:"+d" }} ({{ r.get_direction_display }})</li>
-{% endfor %}
-</ul>
-{% endif %}
 </div>

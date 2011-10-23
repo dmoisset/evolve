@@ -21,6 +21,7 @@ class CitySpecialInline(admin.TabularInline):
 
 class CityAdmin(admin.ModelAdmin):
     inlines = [CitySpecialInline]
+    list_display = ('name', 'resource')
 
 class BuildingAdmin(admin.ModelAdmin):
     list_display = ('name', 'kind', 'cost','effect')

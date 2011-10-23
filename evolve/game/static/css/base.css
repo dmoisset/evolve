@@ -3,4 +3,59 @@ body {
     font-size: 10pt;
 }
 
+.player-header {
+    margin-left: -1.6em;
+    margin-right: -1.6em;
+}
+.player-header h3 {
+    background-color: #5b97ff;
+    padding: 8px 0;
+}
+.player-header .money {
+    float: right;
+    margin: 0;
+    padding: 8px 4px; 
+}
+
+#players .ui-tabs-panel {
+    padding-top: 0;
+}
+
+ul.building-set {
+    float:left;
+    min-height:100px;
+    margin-right: 10px;
+    list-style: none;
+    padding: 5px;
+}
+
+/* Building kinds */
+.kind-bas {
+    background-color: #5d4500;
+    color: white;
+}
+.kind-cpx {
+    background-color: #5d5d5d;
+    color: white;
+}
+.kind-eco {
+    background-color: #e8fa2d;
+}
+.kind-civ {
+    background-color: #2d48f7;
+    color: white;
+}
+.kind-mil {
+    background-color: #f72d35;
+}
+.kind-sci {
+    background-color: #295d00;
+    color: white;
+}
+.kind-per {
+    background-color: #39005d;
+    color: white;
+    clear:left;
+    min-height: 0 !important;
+}
 

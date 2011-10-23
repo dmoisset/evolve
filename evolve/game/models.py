@@ -231,6 +231,25 @@ class Player(models.Model):
     trade_left = models.PositiveIntegerField(default=0) # Money used in trade with left player
     trade_right = models.PositiveIntegerField(default=0) # Money used in trade with right player
 
+    def building_list(self):
+        """Building list, sorted by kind. For template use"""
+        result = [dict(
+            kind='bas' if self.city.resource.is_basic else 'cpx', # FIXME: hardocded constant
+            label='City',
+            building=None,
+            effect=self.city.resource.name
+        )]
+        for b in self.buildings.all():
+            result.append(dict(
+                kind=b.kind.pk,
+                label=b.name,
+                building=b,
+                effect=b.effect
+            ))
+        ORDERING = ['bas', 'cpx', 'eco', 'civ', 'sci', 'mil', 'per']
+        result.sort(key=lambda b:ORDERING.index(b['kind']))
+        return result
+
     def active_effects(self):
         """The set of effects which apply to this player"""
         # City specials

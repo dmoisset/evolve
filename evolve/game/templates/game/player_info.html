@@ -1,19 +1,21 @@
 <div id="player-info-{{ player.pk }}">
 
-<h2>{{ player }}</h2>
-<p>City: {{ player.city }} / {{ player.variant }}</p>
-<p>Money: ${{ player.money }}</p>
+<div class="player-header">
+    <p class="money">${{ player.money }}</p>
+    <h3>{{ player.city }} ({{ player.variant }})</p>
+</div>
 
-<h3>Buildings:</h3>
+{% regroup player.building_list by kind as kinds %}
 
-<ul>
-    <li><b>City produces:</b> {{ player.city.resource }}</li>
-    {% for b in player.buildings.all %}
-    <li><strong>{{ b }}:</strong> {{ b.effect }}</li>
+{% for k in kinds %}
+    <ul class="kind-{{ k.grouper }} building-set ui-corner-all">
+    {% for b in k.list %}
+       <li><strong>{{ b.label }}:</strong> {{ b.effect }}</li>
     {% endfor %}
-</ul>
+    </ul>
+{% endfor %}
 
-<h3>Specials:</h3>
+<h3 style="clear:both;">Specials:</h3>
 
 <p>Built: {{ player.specials }}
 {% if player.next_special %}

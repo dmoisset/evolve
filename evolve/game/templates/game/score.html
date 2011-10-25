@@ -1,4 +1,8 @@
 {% extends "game/base.html" %}
+
+{% block extrahead %}
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/score.css"/>
+{% endblock %}
 {% block contents %}
 
 <h1>Finished Game: Scoreboard</h1>
@@ -11,7 +15,7 @@
             <th>{{ p }}</th>
         {% endfor %}
     </tr>
-    <tr>
+    <tr class="kind-mil">
         <th>Military</th>
         {% for p in game.player_set.all %}
             <td>{{ p.score.military }}</td>
@@ -29,22 +33,28 @@
             <td>{{ p.score.special }}</td>
         {% endfor %}
     </tr>
-    <tr>
+    <tr class="kind-civ">
         <th>Civilian</th>
         {% for p in game.player_set.all %}
             <td>{{ p.score.civilian }}</td>
         {% endfor %}
     </tr>
-    <tr>
+    <tr class="kind-sci">
         <th>Science</th>
         {% for p in game.player_set.all %}
             <td>{{ p.score.science }}</td>
         {% endfor %}
     </tr>
-    <tr>
+    <tr class="kind-eco">
         <th>Economy</th>
         {% for p in game.player_set.all %}
             <td>{{ p.score.economy }}</td>
+        {% endfor %}
+    </tr>
+    <tr class="kind-per">
+        <th>Personality</th>
+        {% for p in game.player_set.all %}
+            <td>{{ p.score.personality}}</td>
         {% endfor %}
     </tr>
     <tr>

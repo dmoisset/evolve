@@ -11,9 +11,25 @@
             for (i=0; i < leftlinks.length; i++) {
                 $(leftlinks[i]).click(function () {
                     $tabs.tabs('select', this.hash);
+                    return false;
                 });
             }
             
+            /* Fancy option selector */
+            var optiondivs = $("div.option");
+            function setup_option(div, id) {
+                $(div).click(function () {
+                    $("input:radio[name=option][value="+id+"]").attr('checked', true);
+                    $("div.option").removeClass("current");
+                    $(this).addClass("current");
+                });
+            }
+            for (i=0; i < optiondivs.length; i++) {
+                div_id = optiondivs[i].id.split('-')[1];
+                setup_option(optiondivs[i], div_id);
+            }
+            current = $('input:radio[name=option]:checked').val();
+            $("div.option#selector-"+current).addClass("current");
         });
     </script>
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/play.css"/>
@@ -45,16 +61,25 @@
 {% if player_in_game.can_play %}
     <h3>Next action</h3>
 
+    {% if form.option.errors %}
+        <div class="ui-state-error"><span class="ui-icon ui-icon-alert"></span>{{ form.option.errors|join:"<br/>" }}</div>
+    {% endif %}
+    {% for o in player_in_game.current_options.all %}
+        <div class="option kind-{{o.building.kind.name}} ui-corner-all" id="selector-{{ o.id }}">
+            <p><span class="building-name">{{ o.building }}</span>: {{o.building.effect }}</p>
+            {% with o.building.free_having.all as free_dependencies %}
+                <p>({{ o.building.cost }}{% if free_dependencies %} or {{ free_dependencies|join:" or " }}{% endif %})</p>
+            {% endwith %}
+        </div>
+    {% endfor %}
+
     <form action="" method="POST">
         <table>
-            <tr><th>{{ form.option.label }}</th>
+            <tr class="hidden"><th>{{ form.option.label }}</th>
                 <td>{{ form.option }}</td>
                 <td><ul>{% for o in player_in_game.current_options.all %}<li>{{ o.building.cost }}</li>{% endfor %}</ul></td>
                 <td><ul>{% for o in player_in_game.current_options.all %}<li>{{ o.building.effect }}</li>{% endfor %}</ul></td>
             </tr>
-            {% if form.option.errors %}
-            <tr><td colspan="3">{{ form.option.errors }}</td></tr>
-            {% endif %}
             <tr><th>{{ form.action.label }}</th>
                 <td>{{ form.action }}</td>
             </tr>

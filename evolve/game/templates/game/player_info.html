@@ -36,17 +36,13 @@
     {% endfor %}
 </div>
 
-<h3 style="clear:both;">Specials:</h3>
-
-<p>Built: {{ player.specials }}
-{% if player.next_special %}
-<p>Cost of next: {{ player.next_special.cost }}</p>
-{% endif %}
-
-<ol>
-{% for s in player.all_specials %}
-<li>{{ s.effect }} ({{s.cost}})</li>
-{% endfor %}
-</ol>
+<div class="specials">
+    <ol>
+    {% for s in player.all_specials %}
+        <li class="ui-corner-all
+        {% if s.order < player.specials %}built{% endif %}{% if s.order == player.specials %}next{% endif %}{% if s.order > player.specials %}unbuilt{% endif %}">{{ s.effect }}<span class="cost"> ({{s.cost}})</span></li>
+    {% endfor %}
+    </ol>
+</div>
 
 </div>

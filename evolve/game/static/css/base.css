@@ -61,6 +61,35 @@ ul.building-set {
     padding: 5px;
 }
 
+.specials {
+    clear: both;
+    border-top: 1px solid #AAAAAA;
+    margin: 0 -1.6em;
+}
+
+.specials li {
+    display: inline-block;
+    list-style: none;
+    border: 1px solid black;
+    padding: 3px;
+    height: 50px;
+    width: 200px;
+}
+.specials .built {
+    background: black;
+    color: white;
+}
+
+.specials .unbuilt {
+    color: #aaa;
+}
+
+.specials .cost {
+    display: block;
+}
+.specials .built .cost { 
+    visibility: hidden; /* No need to display costs for built specials */
+}
 /* Building kinds */
 .kind-bas {
     background-color: #5d4500;

@@ -30,4 +30,59 @@ class ScoreTest(TestCase):
         result = s.total()
         self.assertEqual(result, 49)
 
+class BuildingKindTest(TestCase):
+
+    def test_unicode(self):
+        bk = models.BuildingKind(name=models.PERSONALITY)
+        self.assertNotEqual(unicode(bk), '')
+
+class ResourceTest(TestCase):
+
+    def test_unicode(self):
+        r = models.Resource(name=u'Test Resource')
+        self.assertEqual(unicode(r), u'Test Resource')
+
+
+class ScienceTest(TestCase):
+
+    def test_unicode(self):
+        s = models.Science(name=u'Test Science')
+        self.assertEqual(unicode(s), u'Test Science')
+
+class VariantTest(TestCase):
+
+    def test_unicode(self):
+        s = models.Variant(label=u'Test Variant')
+        self.assertEqual(unicode(s), u'Test Variant')
+
+class AgeTest(TestCase):
+
+    def setUp(self):
+        self.a1 = models.Age.objects.create(
+            name='test age 1',
+            order=0,
+            direction='l',
+            victory_score=1
+        )
+        self.a2 = models.Age.objects.create(
+            name='test age 2',
+            order=1,
+            direction='l',
+            victory_score=1
+        )
+
+    def test_first(self):
+        first_age = models.Age.first()
+        self.assertEqual(first_age, self.a1)
+
+    def test_next(self):
+        next_age = self.a1.next()
+        self.assertEqual(next_age, self.a2)
+    
+    def test_next_after_final(self):
+        next_age = self.a2.next()
+        self.assertIs(next_age, None)
+    
+    def test_unicode(self):
+        self.assertEqual(unicode(self.a1), u'test age 1')
 

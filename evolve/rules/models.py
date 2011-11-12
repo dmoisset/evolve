@@ -359,6 +359,8 @@ class Effect(models.Model):
             items.append("Apply one personality option from a neighbor")
 
         return ", ".join(items)
+        # not tested. This is mildly used in the admin, but the UI should
+        # find a better representation
 
 class CitySpecial(models.Model):
     """

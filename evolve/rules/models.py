@@ -132,6 +132,8 @@ class Cost(models.Model):
     def items(self):
         """Artially prettyprinted version of cost lines. An iterator on strings"""
         return [unicode(l) for l in self.costline_set.all()]
+        # Not covered by tests; used only auxiliarly by Effect.__unicode__
+        # and in Cost.__unicode__
 
     def to_dict(self):
         """

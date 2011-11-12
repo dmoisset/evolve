@@ -1,3 +1,5 @@
+import mock
+
 from django.test import TestCase
 from evolve.rules import models
 
@@ -94,8 +96,7 @@ class EmptyCostTest(TestCase):
     def test_to_dict(self):
         self.cost.money = 7
         d = self.cost.to_dict()
-        self.assertEqual(d.keys(), ['$'])
-        self.assertEqual(d['$'], 7)
+        self.assertEqual(d, {'$': 7})
 
     def test_to_list(self):
         self.cost.money = 7
@@ -123,10 +124,7 @@ class NonEmptyCostTest(TestCase):
     
     def test_to_dict(self):
         d = self.cost.to_dict()
-        self.assertEqual(set(d.keys()), set(['$', 'R1', 'R2']))
-        self.assertEqual(d['$'], 0)
-        self.assertEqual(d['R1'], 2)
-        self.assertEqual(d['R2'], 3)
+        self.assertEqual(d, {'$': 0, 'R1': 2, 'R2': 3})
 
     def test_to_list(self):
         self.cost.money = 7
@@ -138,4 +136,121 @@ class NonEmptyCostTest(TestCase):
         # or invisible
         self.assertNotEqual(unicode(self.cost), 'Free')
         self.assertNotEqual(unicode(self.cost), '')
+
+class CityTest(TestCase):
+
+    def test_unicode(self):
+        c = models.City(name=u'Test City')
+        self.assertEqual(unicode(c), u'Test City')
+
+def mock_player(specials, defeats, kinds):
+    result = mock.Mock()
+    result.specials.return_value = specials
+    result.defeats.return_value = defeats
+    result.count.side_effect = lambda kind: kinds.get(kind.name, 0)
+    return result
+
+class EffectTest(TestCase):
+
+    def setUp(self):
+        self.bk_mil = models.BuildingKind(name='mil')
+        self.bk_mil.save()
+        self.bk_civ = models.BuildingKind(name='civ')
+        self.bk_civ.save()
+        self.bk_sci = models.BuildingKind(name='sci')
+        self.bk_sci.save()
+
+    def should_be_clean(self, effect):
+        try:
+            effect.clean()
+        except models.ValidationError:
+            self.fail("clean() on an effect raised ValidationError and shouldn't")
+
+    def test_clean_simple(self):
+        e = models.Effect()
+        self.should_be_clean(e)
+            
+    def test_clean_trade(self):
+        e = models.Effect(trade=models.Cost(), left_trade=1)
+        self.should_be_clean(e)
+        e = models.Effect(trade=models.Cost(), right_trade=1)
+        self.should_be_clean(e)
+        e = models.Effect(trade=models.Cost(), left_trade=1, right_trade=1)
+        self.should_be_clean(e)
+
+    def test_clean_pay(self):
+        e = models.Effect(kind_payed=models.BuildingKind(), money_per_local_building=1)
+        self.should_be_clean(e)
+        e = models.Effect(kind_payed=models.BuildingKind(), money_per_neighbor_building=1)
+        self.should_be_clean(e)
+        e = models.Effect(kind_payed=models.BuildingKind(), money_per_local_building=1, money_per_neighbor_building=1)
+        self.should_be_clean(e)
+
+    def test_unclean_trade(self):
+        e = models.Effect(trade=models.Cost(), left_trade=0, right_trade=0)
+        with self.assertRaises(models.ValidationError):
+            e.clean()
+        e = models.Effect(trade=None, left_trade=3, right_trade=0)
+        with self.assertRaises(models.ValidationError):
+            e.clean()
         
+    def test_unclean_pay(self):
+        e = models.Effect(kind_payed=models.BuildingKind(), money_per_local_building=0, money_per_neighbor_building=0)
+        with self.assertRaises(models.ValidationError):
+            e.clean()
+        e = models.Effect(kind_payed=None, money_per_local_building=0, money_per_neighbor_building=2)
+        with self.assertRaises(models.ValidationError):
+            e.clean()
+        
+    def test_money_from_production(self):
+        e = models.Effect(production=models.Cost(money=3))
+        p = mock_player(1, 1, {'civ': 1})
+        money = e.money(p, p, p)
+        self.assertEqual(money, 3)
+        
+    def test_money_per_neighbor_building(self):
+        e = models.Effect(kind_payed=self.bk_civ, money_per_neighbor_building=2)
+        p1 = mock_player(1, 1, {'civ': 1, 'mil': 4})
+        p2 = mock_player(1, 1, {'civ': 2, 'mil': 4})
+        p3 = mock_player(1, 1, {'civ': 3, 'mil': 4})
+        money = e.money(p1, p2, p3)
+        self.assertEqual(money, 10) # 2 * (2+3)
+
+    def test_money_per_local_building(self):
+        e = models.Effect(kind_payed=self.bk_civ, money_per_local_building=3)
+        p1 = mock_player(1, 1, {'civ': 2, 'mil': 4})
+        p2 = mock_player(1, 1, {'civ': 5, 'mil': 4})
+        money = e.money(p1, p2, p2)
+        self.assertEqual(money, 6) # 3 * 2
+
+    def test_money_per_neighbor_special(self):
+        e = models.Effect(money_per_neighbor_special=2)
+        p1 = mock_player(1, 1, {'civ': 1, 'mil': 4})
+        p2 = mock_player(3, 1, {'civ': 2, 'mil': 4})
+        p3 = mock_player(5, 1, {'civ': 3, 'mil': 4})
+        money = e.money(p1, p2, p3)
+        self.assertEqual(money, 16) # 2 * (3+5)
+
+    def test_money_per_local_special(self):
+        e = models.Effect(money_per_local_special=2)
+        p1 = mock_player(1, 1, {'civ': 1, 'mil': 4})
+        p2 = mock_player(3, 1, {'civ': 2, 'mil': 4})
+        money = e.money(p1, p2, p2)
+        self.assertEqual(money, 2) # 2 * 1
+
+    def test_money_effects_accumulate(self):
+        e = models.Effect(
+            production=models.Cost(money=3),
+            kind_payed=self.bk_civ,
+            money_per_neighbor_building=2,
+            money_per_local_building=3,
+            money_per_neighbor_special=2,
+            money_per_local_special=1
+        )
+        p1 = mock_player(1, 1, {'civ': 1, 'mil': 4})
+        p2 = mock_player(3, 1, {'civ': 2, 'sci': 4})
+        p3 = mock_player(5, 1, {'civ': 3})
+        money = e.money(p1, p2, p3)
+        self.assertEqual(money, 33) # 3 + 2 * (2+3) + 3*1 + 2*(3+5) + 1*1
+    
+    # TODO: score tests

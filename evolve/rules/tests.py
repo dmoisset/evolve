@@ -86,3 +86,56 @@ class AgeTest(TestCase):
     def test_unicode(self):
         self.assertEqual(unicode(self.a1), u'test age 1')
 
+class EmptyCostTest(TestCase):
+    
+    def setUp(self):
+        self.cost = models.Cost()
+    
+    def test_to_dict(self):
+        self.cost.money = 7
+        d = self.cost.to_dict()
+        self.assertEqual(d.keys(), ['$'])
+        self.assertEqual(d['$'], 7)
+
+    def test_to_list(self):
+        self.cost.money = 7
+        l = self.cost.to_list()
+        self.assertEqual(l, [])
+
+    def test_unicode_free(self):
+        self.assertEqual(unicode(self.cost), 'Free')
+
+    def test_unicode_non_free(self):
+        self.cost.money = 7
+        # Do not need a specific formatting, but shouldn't bee blatantly wrong
+        # or invisible
+        self.assertNotEqual(unicode(self.cost), 'Free')
+        self.assertNotEqual(unicode(self.cost), '')
+
+class NonEmptyCostTest(TestCase):
+    
+    def setUp(self):
+        self.cost = models.Cost.objects.create()
+        self.resource_1 = models.Resource.objects.create(name='R1')
+        self.resource_2 = models.Resource.objects.create(name='R2')
+        self.cost_line_1 = models.CostLine.objects.create(cost=self.cost, amount=2, resource=self.resource_1)
+        self.cost_line_2 = models.CostLine.objects.create(cost=self.cost, amount=3, resource=self.resource_2)
+    
+    def test_to_dict(self):
+        d = self.cost.to_dict()
+        self.assertEqual(set(d.keys()), set(['$', 'R1', 'R2']))
+        self.assertEqual(d['$'], 0)
+        self.assertEqual(d['R1'], 2)
+        self.assertEqual(d['R2'], 3)
+
+    def test_to_list(self):
+        self.cost.money = 7
+        l = self.cost.to_list()
+        self.assertEqual(set(l), set([(2, u'R1'), (3, u'R2')]))
+
+    def test_unicode_non_free(self):
+        # Do not need a specific formatting, but shouldn't bee blatantly wrong
+        # or invisible
+        self.assertNotEqual(unicode(self.cost), 'Free')
+        self.assertNotEqual(unicode(self.cost), '')
+        

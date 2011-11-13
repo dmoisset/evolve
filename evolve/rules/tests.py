@@ -253,4 +253,64 @@ class EffectTest(TestCase):
         money = e.money(p1, p2, p3)
         self.assertEqual(money, 33) # 3 + 2 * (2+3) + 3*1 + 2*(3+5) + 1*1
     
-    # TODO: score tests
+    def test_get_score_empty(self):
+        e = models.Effect.objects.create()
+        p = mock_player(1, 1, {'civ': 1})
+        score = e.get_score(p, p, p)
+        self.assertEqual(score, 0)
+        
+    def test_get_score_per_local_kind(self):
+        e = models.Effect.objects.create(score_per_local_building=2)
+        e.kinds_scored.add(self.bk_civ, self.bk_mil, self.bk_sci)
+        p1 = mock_player(1, 1, {'civ': 3, 'mil': 5, 'per': 7})
+        p2 = mock_player(1, 1, {'civ': 2, 'mil': 4, 'per': 8})
+        p3 = mock_player(1, 1, {'civ': 2, 'mil': 4, 'per': 8})
+        score = e.get_score(p1, p2, p3)
+        self.assertEqual(score, 16) # 2* (3+5)
+
+    def test_get_score_per_neighbor_kind(self):
+        e = models.Effect.objects.create(score_per_neighbor_building=2)
+        e.kinds_scored.add(self.bk_civ, self.bk_mil)
+        p1 = mock_player(1, 1, {'civ': 3, 'mil': 5, 'sci': 7})
+        p2 = mock_player(1, 1, {'civ': 2, 'sci': 8})
+        p3 = mock_player(1, 1, {'mil': 4, 'sci': 8})
+        score = e.get_score(p1, p2, p3)
+        self.assertEqual(score, 12) # 2* (2+4)
+
+    def test_get_score_per_local_special(self):
+        e = models.Effect.objects.create(score_per_local_special=3)
+        p = mock_player(2, 1, {'civ': 1})
+        score = e.get_score(p, p, p)
+        self.assertEqual(score, 6) # 3*2
+
+    def test_get_score_per_neighbor_special(self):
+        e = models.Effect.objects.create(score_per_neighbor_special=2)
+        p1 = mock_player(2, 1, {'civ': 1})
+        p2 = mock_player(3, 1, {'civ': 1})
+        p3 = mock_player(5, 1, {'civ': 1})
+        score = e.get_score(p1, p2, p3)
+        self.assertEqual(score, 16) # 2 * (3+5)
+
+    def test_get_score_per_defeat(self):
+        e = models.Effect.objects.create(score_per_neighbor_defeat=2)
+        p1 = mock_player(1, 2, {'civ': 1})
+        p2 = mock_player(1, 3, {'civ': 1})
+        p3 = mock_player(1, 5, {'civ': 1})
+        score = e.get_score(p1, p2, p3)
+        self.assertEqual(score, 16) # 2 * (3+5)
+
+    def test_get_score_accumulates(self):
+        e = models.Effect.objects.create(
+            score_per_local_building=1,
+            score_per_neighbor_building=2,
+            score_per_local_special=3,
+            score_per_neighbor_special=2,
+            score_per_neighbor_defeat=2
+        )
+        e.kinds_scored.add(self.bk_civ)
+        p1 = mock_player(2, 7, {'civ': 3, 'mil': 5, 'per': 7})
+        p2 = mock_player(3, 11, {'civ': 2, 'per': 8})
+        p3 = mock_player(5, 13, {'mil': 4, 'per': 8})
+        score = e.get_score(p1, p2, p3)
+        self.assertEqual(score, 77) # 1*3 + 2*(2+0) + 3*2 + 2*(3+5) + 2*(11+13)
+

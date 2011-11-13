@@ -314,3 +314,68 @@ class EffectTest(TestCase):
         score = e.get_score(p1, p2, p3)
         self.assertEqual(score, 77) # 1*3 + 2*(2+0) + 3*2 + 2*(3+5) + 2*(11+13)
 
+class CitySpecialTest(TestCase):
+
+    def test_unicode(self):
+        resource = models.Resource.objects.create(name='Test resource')
+        city = models.City.objects.create(name='Test city', resource=resource)
+        variant = models.Variant.objects.create(label='Test Variant')
+        cost = models.Cost.objects.create()
+        effect = models.Effect.objects.create()
+        c = models.CitySpecial(city=city, variant=variant, order=0, cost=cost, effect=effect)
+        self.assertNotEqual(unicode(c), u'')
+
+class BuildingTest(TestCase):
+ 
+    def test_score_economic(self):
+        k = models.BuildingKind(name='eco')
+        b = models.Building(kind=k)
+        with mock.patch.object(models.Building, 'effect') as mock_effect:
+            mock_effect.get_score.return_value = 42
+            score = b.score(None, None, None) # using None as players, because the mock effect does not care
+        self.assertEqual(score, models.Score(treasury=0, military=0, special=0, civilian=0, economy=42, science=0, personality=0))
+        
+    def test_score_civilian(self):
+        k = models.BuildingKind(name='civ')
+        b = models.Building(kind=k)
+        with mock.patch.object(models.Building, 'effect') as mock_effect:
+            mock_effect.get_score.return_value = 42
+            score = b.score(None, None, None) # using None as players, because the mock effect does not care
+        self.assertEqual(score, models.Score(treasury=0, military=0, special=0, civilian=42, economy=0, science=0, personality=0))
+        
+    def test_score_personality(self):
+        k = models.BuildingKind(name='per')
+        b = models.Building(kind=k)
+        with mock.patch.object(models.Building, 'effect') as mock_effect:
+            mock_effect.get_score.return_value = 42
+            score = b.score(None, None, None) # using None as players, because the mock effect does not care
+        self.assertEqual(score, models.Score(treasury=0, military=0, special=0, civilian=0, economy=0, science=0, personality=42))
+        
+    def test_score_other_fail(self):
+        k = models.BuildingKind(name='mil')
+        b = models.Building(kind=k)
+        with mock.patch.object(models.Building, 'effect') as mock_effect:
+            mock_effect.get_score.return_value = 42
+            with self.assertRaises(AssertionError):
+                score = b.score(None, None, None) # using None as players, because the mock effect does not care
+        
+    def test_score_null(self):
+        k = models.BuildingKind(name='mil')
+        b = models.Building(kind=k)
+        with mock.patch.object(models.Building, 'effect') as mock_effect:
+            mock_effect.get_score.return_value = 0
+            score = b.score(None, None, None) # using None as players, because the mock effect does not care
+        self.assertEqual(score, models.Score.new())
+        
+    def test_unicode(self):
+        b = models.Building(name='Test building')
+        self.assertEqual(unicode(b), u'Test building')
+
+class BuildOptionTest(TestCase):
+
+    def test_unicode(self):
+        b = models.Building()
+        bo = models.BuildOption(players_needed=3, building=b)
+        self.assertNotEqual(unicode(bo), '')
+
+# TODO: test economy.py, forms.py

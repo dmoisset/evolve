@@ -178,10 +178,13 @@ class Game(models.Model):
             p.reset_action()
     end_of_turn.alters_data = True
 
+    def missing_players(self):
+        """This is the list of players who haven't played yet"""
+        return self.player_set.filter(action='')
+
     def turn_check(self):
         """Checks if we need to do end of turn"""
-        missing_players = self.player_set.filter(action='')
-        if not missing_players:
+        if not self.missing_players():
             self.end_of_turn()
     turn_check.alters_data = True
 

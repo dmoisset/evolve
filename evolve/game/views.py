@@ -170,8 +170,8 @@ class GameWatchView(DetailView):
 
 game_watch = GameWatchView.as_view()
 
-def game_ajax_missing_players(request, pk):
+def game_ajax_waiting_players(request, pk):
     game = get_object_or_404(Game, id=pk)
-    result = [player.id for player in game.missing_players()]
+    result = [player.id for player in game.waiting_players()]
     return HttpResponse(simplejson.dumps(result), mimetype="application/json")
-    
+        

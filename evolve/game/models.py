@@ -182,6 +182,10 @@ class Game(models.Model):
         """This is the list of players who haven't played yet"""
         return self.player_set.filter(action='')
 
+    def waiting_players(self):
+        """This is the list of players who have already played"""
+        return self.player_set.exclude(action='')
+
     def turn_check(self):
         """Checks if we need to do end of turn"""
         if not self.missing_players():

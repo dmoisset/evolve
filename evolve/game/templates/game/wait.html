@@ -4,17 +4,11 @@
     <script>
         /* Toggles the indicator to know which players have already played */
         function update_players() {
-            $.getJSON('{% url game-ajax-missing-players pk=game.pk %}',
+            $.getJSON('{% url game-ajax-waiting-players pk=game.pk %}',
                 function (data) {
                     /* Data is a list of player ids */
-                    var indicators = $("#missing-players li");
-                    for (i=0; i < indicators.length; i++) {
-                        s = indicators[i].id;
-                        current = parseInt(s.substring("player-".length, s.length));
-                        if (data.indexOf(current) == -1) {
-                            /* This player already played. hide from the list! */
-                            $(indicators[i]).addClass("hidden");
-                        }
+                    for (i=0; i < data.length; i++) {
+                        $("#player-"+data[i]).addClass("hidden");
                     }
                 }
             );

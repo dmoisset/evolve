@@ -172,6 +172,6 @@ game_watch = GameWatchView.as_view()
 
 def game_ajax_missing_players(request, pk):
     game = get_object_or_404(Game, id=pk)
-    result = [player.id for player in game.missing_players()]+[42]
+    result = [player.id for player in game.missing_players()]
     return HttpResponse(simplejson.dumps(result), mimetype="application/json")
     

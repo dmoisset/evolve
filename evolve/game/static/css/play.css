@@ -2,6 +2,10 @@
     font-weight: bold;
 }
 
+#players-tabs li a img {
+    border: none;
+}
+
 .option {
     padding: 5px;
     margin: 10px;

@@ -2,6 +2,34 @@
 
 {% block extrahead %}
     <script>
+        /* Maps the divs with build options to sync status with radiobutton */
+        function setup_option(div, id) {
+            $(div).click(function () {
+                $("input:radio[name=option][value="+id+"]").attr('checked', true);
+                $("div.option").removeClass("current");
+                $(this).addClass("current");
+            });
+        }
+
+        /* Toggles the indicator to know which players have already played */
+        function update_players() {
+            $.getJSON('{% url game-ajax-missing-players pk=game.pk %}',
+                function (data) {
+                    /* Data is a list of player ids */
+                    var indicators = $("#players-tabs li a img.hidden");
+                    for (i=0; i < indicators.length; i++) {
+                        s = indicators[i].id;
+                        current = parseInt(s.substring("already-played-".length, s.length));
+                        if (data.indexOf(current) == -1) {
+                            /* This player already played. show the indicator! */
+                            $(indicators[i]).removeClass("hidden");
+                        }
+                    }
+                }
+            );
+        }
+
+        /* Startup code*/ 
         $(function() {
             var $tabs = $("#players").tabs(); /* Enable tabs*/
             $tabs.tabs('select', 1); /* Select player tab */
@@ -17,19 +45,16 @@
             
             /* Fancy option selector */
             var optiondivs = $("div.option");
-            function setup_option(div, id) {
-                $(div).click(function () {
-                    $("input:radio[name=option][value="+id+"]").attr('checked', true);
-                    $("div.option").removeClass("current");
-                    $(this).addClass("current");
-                });
-            }
             for (i=0; i < optiondivs.length; i++) {
                 div_id = optiondivs[i].id.split('-')[1];
                 setup_option(optiondivs[i], div_id);
             }
             current = $('input:radio[name=option]:checked').val();
             $("div.option#selector-"+current).addClass("current");
+            
+            /* Automatic update based on who played */
+            update_players();
+            window.setInterval(update_players, 4000);
         });
     </script>
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/play.css"/>
@@ -41,11 +66,15 @@
 <p>Age: {{ game.age }} Turn: {{ game.turn }}</p>
 
 <div id="players">
-    <ul>
-        <li><a href="#player-info-{{player_in_game.left_player.pk}}">{{ player_in_game.left_player }}</a></li>
+    <ul id="players-tabs">
+        <li><a href="#player-info-{{player_in_game.left_player.pk}}">{{ player_in_game.left_player }}
+            <img id="already-played-{{player_in_game.left_player.pk}}" class="hidden" src="{{ STATIC_URL }}admin/img/admin/icon-yes.gif" /></a>
+        </li>
         <li class="current-player"><a href="#player-info-{{player_in_game.pk}}">{{ player_in_game }}</a></li>
         {% for p in player_in_game.all_right_players %}
-            <li><a href="#player-info-{{p.pk}}">{{ p }}</a></li>
+            <li><a href="#player-info-{{p.pk}}">{{ p }}
+                <img id="already-played-{{p.pk}}" class="hidden" src="{{ STATIC_URL }}admin/img/admin/icon-yes.gif" /></a>
+            </li>
         {% endfor %}
     </ul>
 

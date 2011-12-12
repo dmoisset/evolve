@@ -1,11 +1,14 @@
+from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.views.generic.edit import CreateView, FormView
 from django.views.generic.detail import SingleObjectMixin, DetailView
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
+from django.utils import simplejson
 
 from evolve.game.models import Game, Player
 from evolve.game.forms import NewGameForm, JoinForm, StartForm, PlayForm
+
 
 def game_list(request):
     games = Game.objects.filter(finished=False) # Only non finished games   
@@ -167,3 +170,8 @@ class GameWatchView(DetailView):
 
 game_watch = GameWatchView.as_view()
 
+def game_ajax_missing_players(request, pk):
+    game = get_object_or_404(Game, id=pk)
+    result = [player.id for player in game.missing_players()]+[42]
+    return HttpResponse(simplejson.dumps(result), mimetype="application/json")
+    

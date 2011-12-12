@@ -132,6 +132,8 @@ class Cost(models.Model):
     def items(self):
         """Artially prettyprinted version of cost lines. An iterator on strings"""
         return [unicode(l) for l in self.costline_set.all()]
+        # Not covered by tests; used only auxiliarly by Effect.__unicode__
+        # and in Cost.__unicode__
 
     def to_dict(self):
         """
@@ -357,6 +359,8 @@ class Effect(models.Model):
             items.append("Apply one personality option from a neighbor")
 
         return ", ".join(items)
+        # not tested. This is mildly used in the admin, but the UI should
+        # find a better representation
 
 class CitySpecial(models.Model):
     """

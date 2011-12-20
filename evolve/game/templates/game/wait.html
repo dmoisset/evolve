@@ -10,6 +10,10 @@
                     for (i=0; i < data.length; i++) {
                         $("#player-"+data[i]).addClass("hidden");
                     }
+                    /* Check if turn has ended */
+                    if (data.indexOf({{ player_in_game.pk }}) == -1) {
+                        location.replace('{{ game.get_absolute_url }}');
+                    }
                 }
             );
         }

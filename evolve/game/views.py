@@ -156,6 +156,11 @@ class GameWaitView(DetailView):
     model = Game
     template_name = 'game/wait.html'
 
+    def get_context_data(self, **kwargs):
+        result = super(GameWaitView, self).get_context_data(**kwargs)
+        result['player_in_game'] = self.object.get_player(self.request.user)
+        return result
+
 game_wait = login_required(GameWaitView.as_view())
 
 class GameScoreView(DetailView):

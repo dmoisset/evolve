@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
 
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.views.generic.edit import CreateView
 
 def home(request):
@@ -9,7 +9,11 @@ def home(request):
         return redirect('games')
     else:
         return redirect('login')
-    
+
+def logout(request):
+    logout(request)
+    return redirect('login')
+
 class RegisterView(CreateView):
     form_class = UserCreationForm
     template_name = 'registration/register.html'

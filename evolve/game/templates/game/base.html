@@ -4,9 +4,9 @@
     <title>{% block title %}Evolve{% endblock %}</title>
     <link type="text/css" href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" rel="stylesheet" />
     <link type="text/css" href="{{ STATIC_URL }}css/smoothness/jquery-ui-1.8.16.custom.css" rel="Stylesheet" />
-    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}jquery/js/jquery-1.7.2.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui-1.8.16.custom.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap.js"></script>
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/base.css"/>
     {% block extrahead %}{% endblock %}
 </head>
@@ -19,8 +19,12 @@
                 </ul>
                 <ul class="nav pull-right">
                     {% if user.is_authenticated %}
-                        <li><p class="navbar-text">Welcome, <strong>{{ user.username }}</strong></p></li>
-                        <li><a href="{% url logout %}">Logout</a></li>
+                        <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Welcome, <strong>{{ user.username }}</strong><b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                {% if user.is_staff %}<li><a href="/admin/">Admin</a></li>{% endif %}
+                                <li><a href="{% url logout %}">Logout</a></li>
+                            </ul>
+                        </li>
                     {% else %}
                         <li><a href="{% url register %}">Register</a></li>
                         <li><a href="{% url login %}">Login</a></li>

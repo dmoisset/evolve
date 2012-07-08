@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
 
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout as auth_logout
 from django.views.generic.edit import CreateView
 
 def home(request):
@@ -11,7 +11,7 @@ def home(request):
         return redirect('login')
 
 def logout(request):
-    logout(request)
+    auth_logout(request)
     return redirect('login')
 
 class RegisterView(CreateView):

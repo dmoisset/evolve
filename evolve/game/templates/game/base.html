@@ -1,16 +1,38 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"> 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <title>{% block title %}Evolve{% endblock %}</title>
+    <link type="text/css" href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" rel="stylesheet" />
     <link type="text/css" href="{{ STATIC_URL }}css/smoothness/jquery-ui-1.8.16.custom.css" rel="Stylesheet" />
+    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.6.2.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui-1.8.16.custom.min.js"></script>
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/base.css"/>
     {% block extrahead %}{% endblock %}
 </head>
 <body>
-{% block contents %}
-{% endblock %}
-<body>
+    <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container">
+                <ul class="nav">
+                    <li><a class="brand" href="/">Evolve</a></li>
+                </ul>
+                <ul class="nav pull-right">
+                    {% if request.user.is_authenticated %}
+                        <li>Welcome, <strong>{{ request.user.username }}</strong></li>
+                        <li><a href="{% url logout %}">Logout</a></li>
+                    {% else %}
+                        <li><a href="{% url register %}">Register</a></li>
+                        <li><a href="{% url login %}">Login</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+    {% block contents %}
+    {% endblock %}
+    </div>
+</body>
 </html>
 

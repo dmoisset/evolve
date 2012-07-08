@@ -34,15 +34,20 @@
 
 {% block contents %}
 
-<h1>Play Game: Wait for next turn</h1>
+<div class="row">
+    <div class="span12">
+        <h1>Play Game: Wait for next turn</h1>
 
-<p>The following players haven't finished their turns yet:</p>
+        <p>The following players haven't finished their turns yet:</p>
 
-<ul id="missing-players">
-    {% for p in game.missing_players %}
-    <li id="player-{{p.pk}}">{{p}}</li>
-    {% endfor %}
-</ul>
+        <ul id="missing-players">
+            {% for p in game.missing_players %}
+            <li id="player-{{p.pk}}">{{p}}</li>
+            {% endfor %}
+        </ul>
 
-<a href="{{ game.get_absolute_url }}">Try again</a>
+        <a href="{{ game.get_absolute_url }}">Try again</a>
+    </div>
+</div>
+
 {% endblock %}

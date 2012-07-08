@@ -378,4 +378,5 @@ class BuildOptionTest(TestCase):
         bo = models.BuildOption(players_needed=3, building=b)
         self.assertNotEqual(unicode(bo), '')
 
-# TODO: test economy.py, forms.py
+# TODO: test economy.py (ResourceSet, PaymentOption, empty_cost, get_payments, can_pay)
+# TODO: test forms.py (EffectForm.clean)

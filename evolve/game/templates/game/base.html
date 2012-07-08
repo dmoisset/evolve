@@ -18,8 +18,8 @@
                     <li><a class="brand" href="/">Evolve</a></li>
                 </ul>
                 <ul class="nav pull-right">
-                    {% if request.user.is_authenticated %}
-                        <li>Welcome, <strong>{{ request.user.username }}</strong></li>
+                    {% if user.is_authenticated %}
+                        <li><p class="navbar-text">Welcome, <strong>{{ user.username }}</strong></p></li>
                         <li><a href="{% url logout %}">Logout</a></li>
                     {% else %}
                         <li><a href="{% url register %}">Register</a></li>

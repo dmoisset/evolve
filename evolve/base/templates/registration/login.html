@@ -1,11 +1,37 @@
-<h1>Login</h1>
+{% extends "game/base.html" %}
 
-<p>If you have no user, you can <a href="{% url register %}">register</a>
+{% block contents %}
 
-<form action="" method="post">
-    <table>
-    {{form}}
-    <table>
-    {% csrf_token %}
-    <input type="submit">
-</form>
+<div class="row">
+    <div class="span12">
+        <h1>Login</h1>
+
+        <p>If you have no user, you can <a href="{% url register %}">register</a>
+
+        <form class="form-horizontal" action="" method="post">
+            <fieldset>
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="control-group{% if field.errors%} error{% endif %}">
+                        <label class="control-label" for="{{ field.html_name }}">{{ field.label }}</label>
+                        <div class="controls">
+                            {{ field }}
+                            {% if field.errors %}<span class="help-inline">{{ field.errors|join:"; " }}</span>{% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+                {% if form.non_field_errors %}
+                    <div class="control-group error">
+                        <div class="controls">
+                            <div class="help-inline">{{ form.non_field_errors }}</div>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Log in</button>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</div>
+{% endblock %}
